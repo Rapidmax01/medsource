@@ -25,7 +25,7 @@ const app = express();
 
 app.use(helmet());
 app.use(cors({
-  origin: [config.frontendUrl, 'http://localhost:5173'],
+  origin: [config.frontendUrl, 'https://medsourceng.com', 'https://www.medsourceng.com', 'https://medsource-ng.fly.dev', 'http://localhost:5173'],
   credentials: true,
 }));
 app.use(morgan(config.env === 'production' ? 'combined' : 'dev'));
