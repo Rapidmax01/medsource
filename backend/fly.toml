@@ -2,7 +2,6 @@ app = 'medsource-api'
 primary_region = 'lhr'
 
 [build]
-  dockerfile = '../Dockerfile.backend'
 
 [env]
   NODE_ENV = 'production'

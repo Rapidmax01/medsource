@@ -2,7 +2,6 @@ app = 'medsource-ng'
 primary_region = 'lhr'
 
 [build]
-  dockerfile = '../Dockerfile.frontend'
 
 [http_service]
   internal_port = 80

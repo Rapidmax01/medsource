@@ -3,8 +3,8 @@ const config = require('../config');
 class EmailService {
   constructor() {
     this.apiKey = process.env.BREVO_API_KEY;
-    this.senderEmail = process.env.BREVO_SENDER_EMAIL || 'noreply@medsource.ng';
-    this.senderName = process.env.BREVO_SENDER_NAME || 'MedSource';
+    this.senderEmail = process.env.EMAIL_FROM_ADDRESS || process.env.BREVO_SENDER_EMAIL || 'noreply@medsource.ng';
+    this.senderName = process.env.EMAIL_FROM_NAME || process.env.BREVO_SENDER_NAME || 'MedSource';
   }
 
   async sendVerificationCode(email, code) {
