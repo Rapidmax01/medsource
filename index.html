@@ -1,0 +1,1903 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <meta name="theme-color" content="#0A2F1F">
+    <meta name="description" content="MedSource - Find uncommon medications and blood products across Nigeria">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+    <title>MedSource</title>
+    <link rel="manifest" href="manifest.json">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=DM+Sans:ital,opsz,wght@0,9..40,300;0,9..40,400;0,9..40,500;0,9..40,600;0,9..40,700&family=Fraunces:ital,opsz,wght@0,9..144,300;0,9..144,500;0,9..144,700;1,9..144,400&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --bg-primary: #FAFAF7;
+            --bg-secondary: #F0EFEB;
+            --bg-card: #FFFFFF;
+            --bg-dark: #0A2F1F;
+            --bg-dark-secondary: #143D2B;
+            --text-primary: #1A1A1A;
+            --text-secondary: #5A5A52;
+            --text-muted: #8A8A80;
+            --text-on-dark: #F0EFEB;
+            --accent-green: #1B7A4E;
+            --accent-green-light: #E8F5EE;
+            --accent-green-hover: #15603D;
+            --accent-red: #C43D3D;
+            --accent-red-light: #FDE8E8;
+            --accent-amber: #D4940A;
+            --accent-amber-light: #FEF3CD;
+            --accent-blue: #2563EB;
+            --accent-blue-light: #EFF6FF;
+            --border: #E2E1DC;
+            --border-light: #EDECE8;
+            --shadow-sm: 0 1px 2px rgba(0,0,0,0.04);
+            --shadow-md: 0 4px 12px rgba(0,0,0,0.06);
+            --shadow-lg: 0 8px 30px rgba(0,0,0,0.08);
+            --shadow-xl: 0 20px 50px rgba(0,0,0,0.10);
+            --radius-sm: 8px;
+            --radius-md: 12px;
+            --radius-lg: 16px;
+            --radius-xl: 24px;
+            --font-display: 'Fraunces', serif;
+            --font-body: 'DM Sans', sans-serif;
+            --transition: 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        
+        html { scroll-behavior: smooth; }
+        
+        body {
+            font-family: var(--font-body);
+            background: var(--bg-primary);
+            color: var(--text-primary);
+            line-height: 1.6;
+            -webkit-font-smoothing: antialiased;
+            overflow-x: hidden;
+        }
+
+        /* ===== ANIMATIONS ===== */
+        @keyframes fadeInUp {
+            from { opacity: 0; transform: translateY(20px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+        @keyframes fadeIn {
+            from { opacity: 0; }
+            to { opacity: 1; }
+        }
+        @keyframes slideInRight {
+            from { opacity: 0; transform: translateX(30px); }
+            to { opacity: 1; transform: translateX(0); }
+        }
+        @keyframes pulse {
+            0%, 100% { opacity: 1; }
+            50% { opacity: 0.5; }
+        }
+        @keyframes shimmer {
+            0% { background-position: -200% 0; }
+            100% { background-position: 200% 0; }
+        }
+        .animate-in { animation: fadeInUp 0.5s ease-out forwards; }
+        .animate-delay-1 { animation-delay: 0.1s; opacity: 0; }
+        .animate-delay-2 { animation-delay: 0.2s; opacity: 0; }
+        .animate-delay-3 { animation-delay: 0.3s; opacity: 0; }
+        .animate-delay-4 { animation-delay: 0.4s; opacity: 0; }
+
+        /* ===== LAYOUT ===== */
+        .container { max-width: 1200px; margin: 0 auto; padding: 0 20px; }
+        .hidden { display: none !important; }
+        
+        /* ===== HEADER / NAV ===== */
+        .header {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            z-index: 100;
+            background: rgba(250, 250, 247, 0.85);
+            backdrop-filter: blur(20px);
+            -webkit-backdrop-filter: blur(20px);
+            border-bottom: 1px solid var(--border-light);
+            transition: var(--transition);
+        }
+        .header-inner {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            height: 64px;
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 0 20px;
+        }
+        .logo {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            text-decoration: none;
+            cursor: pointer;
+        }
+        .logo-icon {
+            width: 36px;
+            height: 36px;
+            background: var(--bg-dark);
+            border-radius: var(--radius-sm);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+        .logo-icon svg { width: 20px; height: 20px; }
+        .logo-text {
+            font-family: var(--font-display);
+            font-weight: 700;
+            font-size: 1.25rem;
+            color: var(--text-primary);
+            letter-spacing: -0.02em;
+        }
+        .logo-text span { color: var(--accent-green); }
+
+        .nav-links {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+        .nav-link {
+            padding: 8px 16px;
+            border-radius: var(--radius-sm);
+            font-size: 0.9rem;
+            font-weight: 500;
+            color: var(--text-secondary);
+            text-decoration: none;
+            cursor: pointer;
+            transition: var(--transition);
+            border: none;
+            background: none;
+            font-family: var(--font-body);
+        }
+        .nav-link:hover { color: var(--text-primary); background: var(--bg-secondary); }
+        .nav-link.active { color: var(--accent-green); background: var(--accent-green-light); }
+        
+        .btn {
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            padding: 10px 20px;
+            border-radius: var(--radius-sm);
+            font-size: 0.9rem;
+            font-weight: 600;
+            font-family: var(--font-body);
+            cursor: pointer;
+            transition: var(--transition);
+            border: none;
+            text-decoration: none;
+        }
+        .btn-primary {
+            background: var(--accent-green);
+            color: white;
+        }
+        .btn-primary:hover { background: var(--accent-green-hover); transform: translateY(-1px); box-shadow: var(--shadow-md); }
+        .btn-secondary {
+            background: var(--bg-card);
+            color: var(--text-primary);
+            border: 1px solid var(--border);
+        }
+        .btn-secondary:hover { background: var(--bg-secondary); border-color: var(--text-muted); }
+        .btn-outline {
+            background: transparent;
+            color: var(--accent-green);
+            border: 1.5px solid var(--accent-green);
+        }
+        .btn-outline:hover { background: var(--accent-green-light); }
+        .btn-danger { background: var(--accent-red); color: white; }
+        .btn-danger:hover { background: #a83232; }
+        .btn-sm { padding: 6px 14px; font-size: 0.82rem; }
+        .btn-lg { padding: 14px 28px; font-size: 1rem; }
+        .btn-full { width: 100%; justify-content: center; }
+        .btn svg { width: 18px; height: 18px; }
+
+        .mobile-menu-btn {
+            display: none;
+            background: none;
+            border: none;
+            cursor: pointer;
+            padding: 8px;
+            color: var(--text-primary);
+        }
+        .mobile-menu-btn svg { width: 24px; height: 24px; }
+
+        /* ===== HERO ===== */
+        .hero {
+            padding: 120px 0 60px;
+            background: linear-gradient(180deg, var(--bg-primary) 0%, var(--bg-secondary) 100%);
+            position: relative;
+            overflow: hidden;
+        }
+        .hero::before {
+            content: '';
+            position: absolute;
+            top: 80px;
+            right: -100px;
+            width: 400px;
+            height: 400px;
+            background: radial-gradient(circle, rgba(27,122,78,0.06) 0%, transparent 70%);
+            border-radius: 50%;
+        }
+        .hero-content {
+            max-width: 700px;
+            margin: 0 auto;
+            text-align: center;
+            position: relative;
+        }
+        .hero-badge {
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            padding: 6px 14px;
+            background: var(--accent-green-light);
+            color: var(--accent-green);
+            border-radius: 100px;
+            font-size: 0.82rem;
+            font-weight: 600;
+            margin-bottom: 24px;
+            animation: fadeInUp 0.5s ease-out forwards;
+        }
+        .hero-badge::before {
+            content: '';
+            width: 6px;
+            height: 6px;
+            background: var(--accent-green);
+            border-radius: 50%;
+            animation: pulse 2s infinite;
+        }
+        .hero h1 {
+            font-family: var(--font-display);
+            font-size: clamp(2.2rem, 5vw, 3.4rem);
+            font-weight: 700;
+            line-height: 1.15;
+            letter-spacing: -0.03em;
+            color: var(--text-primary);
+            margin-bottom: 20px;
+            animation: fadeInUp 0.5s ease-out 0.1s forwards;
+            opacity: 0;
+        }
+        .hero h1 em {
+            font-style: italic;
+            color: var(--accent-green);
+        }
+        .hero p {
+            font-size: 1.1rem;
+            color: var(--text-secondary);
+            max-width: 520px;
+            margin: 0 auto 36px;
+            animation: fadeInUp 0.5s ease-out 0.2s forwards;
+            opacity: 0;
+        }
+
+        /* ===== SEARCH BAR ===== */
+        .search-container {
+            animation: fadeInUp 0.5s ease-out 0.3s forwards;
+            opacity: 0;
+        }
+        .search-bar {
+            display: flex;
+            align-items: center;
+            background: var(--bg-card);
+            border: 1.5px solid var(--border);
+            border-radius: var(--radius-lg);
+            padding: 6px 6px 6px 20px;
+            box-shadow: var(--shadow-lg);
+            transition: var(--transition);
+            max-width: 600px;
+            margin: 0 auto;
+        }
+        .search-bar:focus-within {
+            border-color: var(--accent-green);
+            box-shadow: 0 0 0 4px rgba(27,122,78,0.1), var(--shadow-lg);
+        }
+        .search-bar svg { width: 20px; height: 20px; color: var(--text-muted); flex-shrink: 0; }
+        .search-bar input {
+            flex: 1;
+            border: none;
+            outline: none;
+            font-size: 1rem;
+            font-family: var(--font-body);
+            padding: 12px;
+            background: transparent;
+            color: var(--text-primary);
+        }
+        .search-bar input::placeholder { color: var(--text-muted); }
+        .search-bar .btn { flex-shrink: 0; border-radius: 10px; }
+        
+        .search-tags {
+            display: flex;
+            gap: 8px;
+            justify-content: center;
+            flex-wrap: wrap;
+            margin-top: 16px;
+        }
+        .search-tag {
+            padding: 6px 14px;
+            background: var(--bg-card);
+            border: 1px solid var(--border);
+            border-radius: 100px;
+            font-size: 0.82rem;
+            color: var(--text-secondary);
+            cursor: pointer;
+            transition: var(--transition);
+        }
+        .search-tag:hover { border-color: var(--accent-green); color: var(--accent-green); }
+
+        /* ===== CATEGORIES ===== */
+        .categories {
+            padding: 60px 0;
+        }
+        .section-header {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            margin-bottom: 28px;
+        }
+        .section-title {
+            font-family: var(--font-display);
+            font-size: 1.6rem;
+            font-weight: 700;
+            letter-spacing: -0.02em;
+        }
+        .section-link {
+            font-size: 0.88rem;
+            font-weight: 600;
+            color: var(--accent-green);
+            text-decoration: none;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            gap: 4px;
+        }
+        .section-link:hover { text-decoration: underline; }
+
+        .category-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(170px, 1fr));
+            gap: 16px;
+        }
+        .category-card {
+            background: var(--bg-card);
+            border: 1px solid var(--border-light);
+            border-radius: var(--radius-md);
+            padding: 24px 20px;
+            text-align: center;
+            cursor: pointer;
+            transition: var(--transition);
+        }
+        .category-card:hover {
+            border-color: var(--accent-green);
+            box-shadow: var(--shadow-md);
+            transform: translateY(-2px);
+        }
+        .category-icon {
+            width: 48px;
+            height: 48px;
+            border-radius: var(--radius-sm);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin: 0 auto 12px;
+            font-size: 1.5rem;
+        }
+        .category-card h3 { font-size: 0.92rem; font-weight: 600; margin-bottom: 4px; }
+        .category-card p { font-size: 0.78rem; color: var(--text-muted); }
+
+        /* ===== PRODUCT GRID ===== */
+        .products { padding: 20px 0 60px; }
+        .product-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+            gap: 20px;
+        }
+        .product-card {
+            background: var(--bg-card);
+            border: 1px solid var(--border-light);
+            border-radius: var(--radius-md);
+            overflow: hidden;
+            transition: var(--transition);
+            cursor: pointer;
+        }
+        .product-card:hover {
+            box-shadow: var(--shadow-lg);
+            transform: translateY(-3px);
+            border-color: var(--border);
+        }
+        .product-img {
+            height: 180px;
+            background: var(--bg-secondary);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 3rem;
+            position: relative;
+        }
+        .product-badge {
+            position: absolute;
+            top: 12px;
+            left: 12px;
+            padding: 4px 10px;
+            border-radius: 100px;
+            font-size: 0.72rem;
+            font-weight: 600;
+        }
+        .badge-pharma { background: var(--accent-blue-light); color: var(--accent-blue); }
+        .badge-blood { background: var(--accent-red-light); color: var(--accent-red); }
+        .badge-verified {
+            position: absolute;
+            top: 12px;
+            right: 12px;
+            padding: 4px 8px;
+            background: var(--accent-green-light);
+            color: var(--accent-green);
+            border-radius: 100px;
+            font-size: 0.7rem;
+            font-weight: 600;
+            display: flex;
+            align-items: center;
+            gap: 4px;
+        }
+        .badge-verified svg { width: 12px; height: 12px; }
+        .product-info { padding: 16px; }
+        .product-info h3 {
+            font-size: 1rem;
+            font-weight: 600;
+            margin-bottom: 6px;
+            line-height: 1.3;
+        }
+        .product-meta {
+            font-size: 0.82rem;
+            color: var(--text-muted);
+            margin-bottom: 12px;
+        }
+        .product-footer {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+        }
+        .product-price {
+            font-family: var(--font-display);
+            font-size: 1.15rem;
+            font-weight: 700;
+            color: var(--accent-green);
+        }
+        .product-location {
+            font-size: 0.78rem;
+            color: var(--text-muted);
+            display: flex;
+            align-items: center;
+            gap: 4px;
+        }
+        .product-location svg { width: 14px; height: 14px; }
+
+        /* ===== STATS BAR ===== */
+        .stats {
+            padding: 40px 0;
+            background: var(--bg-dark);
+            color: var(--text-on-dark);
+        }
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            gap: 20px;
+            text-align: center;
+        }
+        .stat-item h3 {
+            font-family: var(--font-display);
+            font-size: 2rem;
+            font-weight: 700;
+            margin-bottom: 4px;
+        }
+        .stat-item p {
+            font-size: 0.85rem;
+            opacity: 0.7;
+        }
+
+        /* ===== HOW IT WORKS ===== */
+        .how-it-works { padding: 80px 0; }
+        .steps-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+            gap: 32px;
+            margin-top: 40px;
+        }
+        .step-card { text-align: center; }
+        .step-number {
+            width: 48px;
+            height: 48px;
+            background: var(--accent-green-light);
+            color: var(--accent-green);
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-family: var(--font-display);
+            font-weight: 700;
+            font-size: 1.2rem;
+            margin: 0 auto 16px;
+        }
+        .step-card h3 { font-size: 1.05rem; font-weight: 600; margin-bottom: 8px; }
+        .step-card p { font-size: 0.9rem; color: var(--text-secondary); max-width: 280px; margin: 0 auto; }
+
+        /* ===== PRODUCT DETAIL PAGE ===== */
+        .page { padding: 84px 0 40px; min-height: 100vh; }
+        .back-btn {
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            color: var(--text-secondary);
+            font-size: 0.88rem;
+            cursor: pointer;
+            margin-bottom: 24px;
+            background: none;
+            border: none;
+            font-family: var(--font-body);
+            transition: var(--transition);
+        }
+        .back-btn:hover { color: var(--text-primary); }
+        .back-btn svg { width: 18px; height: 18px; }
+
+        .product-detail {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 48px;
+        }
+        .product-detail-img {
+            height: 400px;
+            background: var(--bg-secondary);
+            border-radius: var(--radius-lg);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 5rem;
+        }
+        .product-detail-info h1 {
+            font-family: var(--font-display);
+            font-size: 1.8rem;
+            font-weight: 700;
+            margin-bottom: 8px;
+            letter-spacing: -0.02em;
+        }
+        .product-detail-info .product-meta { margin-bottom: 20px; }
+        .detail-price {
+            font-family: var(--font-display);
+            font-size: 2rem;
+            font-weight: 700;
+            color: var(--accent-green);
+            margin-bottom: 24px;
+        }
+        .detail-section { margin-bottom: 24px; }
+        .detail-section h3 {
+            font-size: 0.85rem;
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+            color: var(--text-muted);
+            margin-bottom: 10px;
+        }
+        .detail-row {
+            display: flex;
+            justify-content: space-between;
+            padding: 10px 0;
+            border-bottom: 1px solid var(--border-light);
+            font-size: 0.92rem;
+        }
+        .detail-row span:first-child { color: var(--text-secondary); }
+        .detail-row span:last-child { font-weight: 500; }
+        .detail-actions {
+            display: flex;
+            gap: 12px;
+            margin-top: 32px;
+        }
+
+        .seller-card {
+            background: var(--bg-secondary);
+            border-radius: var(--radius-md);
+            padding: 20px;
+            margin-top: 24px;
+        }
+        .seller-header {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            margin-bottom: 12px;
+        }
+        .seller-avatar {
+            width: 44px;
+            height: 44px;
+            background: var(--accent-green);
+            color: white;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: 700;
+            font-size: 1rem;
+        }
+        .seller-name { font-weight: 600; font-size: 0.95rem; }
+        .seller-verified {
+            font-size: 0.78rem;
+            color: var(--accent-green);
+            display: flex;
+            align-items: center;
+            gap: 4px;
+        }
+        .seller-verified svg { width: 14px; height: 14px; }
+        .seller-stats {
+            display: flex;
+            gap: 20px;
+            font-size: 0.82rem;
+            color: var(--text-muted);
+        }
+
+        /* ===== AUTH PAGES ===== */
+        .auth-container {
+            max-width: 440px;
+            margin: 0 auto;
+            padding-top: 40px;
+        }
+        .auth-card {
+            background: var(--bg-card);
+            border: 1px solid var(--border-light);
+            border-radius: var(--radius-lg);
+            padding: 40px;
+            box-shadow: var(--shadow-lg);
+        }
+        .auth-card h2 {
+            font-family: var(--font-display);
+            font-size: 1.6rem;
+            font-weight: 700;
+            margin-bottom: 8px;
+            letter-spacing: -0.02em;
+        }
+        .auth-card > p {
+            color: var(--text-secondary);
+            font-size: 0.92rem;
+            margin-bottom: 28px;
+        }
+        .form-group { margin-bottom: 20px; }
+        .form-label {
+            display: block;
+            font-size: 0.85rem;
+            font-weight: 500;
+            margin-bottom: 6px;
+            color: var(--text-primary);
+        }
+        .form-input {
+            width: 100%;
+            padding: 12px 16px;
+            border: 1.5px solid var(--border);
+            border-radius: var(--radius-sm);
+            font-size: 0.95rem;
+            font-family: var(--font-body);
+            transition: var(--transition);
+            background: var(--bg-primary);
+            color: var(--text-primary);
+        }
+        .form-input:focus {
+            outline: none;
+            border-color: var(--accent-green);
+            box-shadow: 0 0 0 3px rgba(27,122,78,0.1);
+        }
+        select.form-input { cursor: pointer; }
+        .form-row { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; }
+        .auth-footer {
+            text-align: center;
+            margin-top: 20px;
+            font-size: 0.88rem;
+            color: var(--text-secondary);
+        }
+        .auth-footer a {
+            color: var(--accent-green);
+            text-decoration: none;
+            font-weight: 600;
+            cursor: pointer;
+        }
+        .auth-footer a:hover { text-decoration: underline; }
+        .auth-divider {
+            display: flex;
+            align-items: center;
+            gap: 16px;
+            margin: 24px 0;
+            font-size: 0.82rem;
+            color: var(--text-muted);
+        }
+        .auth-divider::before, .auth-divider::after {
+            content: '';
+            flex: 1;
+            height: 1px;
+            background: var(--border);
+        }
+
+        /* ===== DASHBOARD ===== */
+        .dashboard {
+            display: grid;
+            grid-template-columns: 240px 1fr;
+            min-height: calc(100vh - 64px);
+            padding-top: 64px;
+        }
+        .sidebar {
+            background: var(--bg-card);
+            border-right: 1px solid var(--border-light);
+            padding: 24px 16px;
+        }
+        .sidebar-nav { display: flex; flex-direction: column; gap: 4px; }
+        .sidebar-link {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            padding: 10px 14px;
+            border-radius: var(--radius-sm);
+            font-size: 0.9rem;
+            color: var(--text-secondary);
+            cursor: pointer;
+            transition: var(--transition);
+            border: none;
+            background: none;
+            font-family: var(--font-body);
+            text-align: left;
+            width: 100%;
+        }
+        .sidebar-link:hover { background: var(--bg-secondary); color: var(--text-primary); }
+        .sidebar-link.active { background: var(--accent-green-light); color: var(--accent-green); font-weight: 600; }
+        .sidebar-link svg { width: 20px; height: 20px; }
+        
+        .dash-content { padding: 32px; }
+        .dash-header {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            margin-bottom: 32px;
+        }
+        .dash-header h1 {
+            font-family: var(--font-display);
+            font-size: 1.6rem;
+            font-weight: 700;
+            letter-spacing: -0.02em;
+        }
+        
+        .dash-stats {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 16px;
+            margin-bottom: 32px;
+        }
+        .dash-stat-card {
+            background: var(--bg-card);
+            border: 1px solid var(--border-light);
+            border-radius: var(--radius-md);
+            padding: 20px;
+        }
+        .dash-stat-card p { font-size: 0.82rem; color: var(--text-muted); margin-bottom: 4px; }
+        .dash-stat-card h3 {
+            font-family: var(--font-display);
+            font-size: 1.5rem;
+            font-weight: 700;
+        }
+        .dash-stat-card .trend {
+            font-size: 0.78rem;
+            margin-top: 4px;
+            display: flex;
+            align-items: center;
+            gap: 4px;
+        }
+        .trend-up { color: var(--accent-green); }
+        .trend-down { color: var(--accent-red); }
+
+        /* ===== TABLE ===== */
+        .table-container {
+            background: var(--bg-card);
+            border: 1px solid var(--border-light);
+            border-radius: var(--radius-md);
+            overflow: hidden;
+        }
+        .table-header {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 16px 20px;
+            border-bottom: 1px solid var(--border-light);
+        }
+        .table-header h3 { font-size: 1rem; font-weight: 600; }
+        table { width: 100%; border-collapse: collapse; }
+        th {
+            text-align: left;
+            padding: 12px 20px;
+            font-size: 0.78rem;
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+            color: var(--text-muted);
+            border-bottom: 1px solid var(--border-light);
+            background: var(--bg-primary);
+        }
+        td {
+            padding: 14px 20px;
+            font-size: 0.9rem;
+            border-bottom: 1px solid var(--border-light);
+        }
+        tr:last-child td { border-bottom: none; }
+        tr:hover td { background: var(--bg-primary); }
+        .status-badge {
+            display: inline-flex;
+            padding: 4px 10px;
+            border-radius: 100px;
+            font-size: 0.75rem;
+            font-weight: 600;
+        }
+        .status-active { background: var(--accent-green-light); color: var(--accent-green); }
+        .status-pending { background: var(--accent-amber-light); color: var(--accent-amber); }
+        .status-expired { background: var(--accent-red-light); color: var(--accent-red); }
+        .status-completed { background: var(--accent-blue-light); color: var(--accent-blue); }
+
+        /* ===== ADD PRODUCT FORM ===== */
+        .form-card {
+            background: var(--bg-card);
+            border: 1px solid var(--border-light);
+            border-radius: var(--radius-md);
+            padding: 32px;
+        }
+        .form-card h2 {
+            font-family: var(--font-display);
+            font-size: 1.3rem;
+            font-weight: 700;
+            margin-bottom: 24px;
+        }
+        textarea.form-input {
+            min-height: 100px;
+            resize: vertical;
+        }
+
+        /* ===== INQUIRY MODAL ===== */
+        .modal-overlay {
+            position: fixed;
+            inset: 0;
+            background: rgba(0,0,0,0.5);
+            backdrop-filter: blur(4px);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            z-index: 200;
+            animation: fadeIn 0.2s ease;
+        }
+        .modal {
+            background: var(--bg-card);
+            border-radius: var(--radius-lg);
+            padding: 32px;
+            max-width: 500px;
+            width: 90%;
+            max-height: 90vh;
+            overflow-y: auto;
+            animation: fadeInUp 0.3s ease;
+        }
+        .modal h2 {
+            font-family: var(--font-display);
+            font-size: 1.3rem;
+            font-weight: 700;
+            margin-bottom: 8px;
+        }
+        .modal > p { color: var(--text-secondary); font-size: 0.9rem; margin-bottom: 24px; }
+        .modal-close {
+            position: absolute;
+            top: 16px;
+            right: 16px;
+            background: none;
+            border: none;
+            cursor: pointer;
+            color: var(--text-muted);
+        }
+
+        /* ===== FOOTER ===== */
+        .footer {
+            background: var(--bg-dark);
+            color: var(--text-on-dark);
+            padding: 60px 0 30px;
+        }
+        .footer-grid {
+            display: grid;
+            grid-template-columns: 2fr 1fr 1fr 1fr;
+            gap: 40px;
+            margin-bottom: 40px;
+        }
+        .footer-brand p {
+            font-size: 0.88rem;
+            opacity: 0.7;
+            margin-top: 12px;
+            max-width: 280px;
+            line-height: 1.6;
+        }
+        .footer-col h4 {
+            font-size: 0.82rem;
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+            margin-bottom: 16px;
+            opacity: 0.5;
+        }
+        .footer-col a {
+            display: block;
+            color: var(--text-on-dark);
+            text-decoration: none;
+            font-size: 0.9rem;
+            padding: 4px 0;
+            opacity: 0.8;
+            transition: var(--transition);
+            cursor: pointer;
+        }
+        .footer-col a:hover { opacity: 1; }
+        .footer-bottom {
+            border-top: 1px solid rgba(255,255,255,0.1);
+            padding-top: 24px;
+            display: flex;
+            justify-content: space-between;
+            font-size: 0.82rem;
+            opacity: 0.5;
+        }
+
+        /* ===== TOAST ===== */
+        .toast {
+            position: fixed;
+            bottom: 24px;
+            right: 24px;
+            background: var(--bg-dark);
+            color: white;
+            padding: 14px 24px;
+            border-radius: var(--radius-md);
+            font-size: 0.9rem;
+            box-shadow: var(--shadow-xl);
+            z-index: 300;
+            animation: slideInRight 0.3s ease;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+        .toast.success { background: var(--accent-green); }
+        .toast.error { background: var(--accent-red); }
+
+        /* ===== RESPONSIVE ===== */
+        @media (max-width: 768px) {
+            .mobile-menu-btn { display: block; }
+            .nav-links { 
+                display: none;
+                position: absolute;
+                top: 64px;
+                left: 0;
+                right: 0;
+                background: var(--bg-card);
+                border-bottom: 1px solid var(--border);
+                padding: 16px;
+                flex-direction: column;
+                box-shadow: var(--shadow-lg);
+            }
+            .nav-links.open { display: flex; }
+            .product-detail { grid-template-columns: 1fr; gap: 24px; }
+            .product-detail-img { height: 260px; }
+            .stats-grid { grid-template-columns: repeat(2, 1fr); }
+            .footer-grid { grid-template-columns: 1fr 1fr; }
+            .dashboard { grid-template-columns: 1fr; }
+            .sidebar { 
+                display: none;
+                position: fixed;
+                top: 64px;
+                left: 0;
+                bottom: 0;
+                width: 260px;
+                z-index: 50;
+                box-shadow: var(--shadow-xl);
+            }
+            .sidebar.open { display: block; }
+            .detail-actions { flex-direction: column; }
+            .form-row { grid-template-columns: 1fr; }
+            .search-bar .btn span { display: none; }
+        }
+    </style>
+</head>
+<body>
+
+<!-- ===== HEADER ===== -->
+<header class="header" id="header">
+    <div class="header-inner">
+        <a class="logo" onclick="navigate('home')">
+            <div class="logo-icon">
+                <svg viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                    <path d="M12 2L2 7l10 5 10-5-10-5z"/>
+                    <path d="M2 17l10 5 10-5"/>
+                    <path d="M2 12l10 5 10-5"/>
+                </svg>
+            </div>
+            <span class="logo-text">Med<span>Source</span></span>
+        </a>
+        <button class="mobile-menu-btn" onclick="toggleMobileMenu()">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><line x1="3" y1="6" x2="21" y2="6"/><line x1="3" y1="12" x2="21" y2="12"/><line x1="3" y1="18" x2="21" y2="18"/></svg>
+        </button>
+        <nav class="nav-links" id="navLinks">
+            <a class="nav-link active" onclick="navigate('home')">Home</a>
+            <a class="nav-link" onclick="navigate('search')">Browse</a>
+            <span id="nav-auth-links">
+                <a class="nav-link" onclick="navigate('login')">Sign In</a>
+                <a class="btn btn-primary btn-sm" onclick="navigate('register')">Get Started</a>
+            </span>
+            <span id="nav-user-links" class="hidden" style="display:inline-flex;align-items:center;gap:8px">
+                <a class="nav-link" onclick="navigate('dashboard')">Dashboard</a>
+                <a class="nav-link" onclick="logout()">Sign Out</a>
+            </span>
+        </nav>
+    </div>
+</header>
+
+<!-- ===== PAGES ===== -->
+
+<!-- HOME PAGE -->
+<main id="page-home">
+    <section class="hero">
+        <div class="container hero-content">
+            <div class="hero-badge">Trusted Healthcare Marketplace</div>
+            <h1>Find <em>uncommon</em> medications & blood products across Nigeria</h1>
+            <p>Connecting hospitals, pharmacies, and patients with verified suppliers of specialty pharmaceuticals and blood products.</p>
+            <div class="search-container">
+                <div class="search-bar">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+                    <input type="text" id="heroSearch" placeholder="Search medications, blood types..." onkeydown="if(event.key==='Enter')doSearch()">
+                    <button class="btn btn-primary" onclick="doSearch()">
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+                        <span>Search</span>
+                    </button>
+                </div>
+                <div class="search-tags">
+                    <span class="search-tag" onclick="quickSearch('Blood Type O-')">Blood Type O-</span>
+                    <span class="search-tag" onclick="quickSearch('Rituximab')">Rituximab</span>
+                    <span class="search-tag" onclick="quickSearch('Immunoglobulin')">Immunoglobulin</span>
+                    <span class="search-tag" onclick="quickSearch('Anti-D')">Anti-D</span>
+                    <span class="search-tag" onclick="quickSearch('Cyclophosphamide')">Cyclophosphamide</span>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <section class="categories">
+        <div class="container">
+            <div class="section-header">
+                <h2 class="section-title">Browse Categories</h2>
+                <a class="section-link" onclick="navigate('search')">View All →</a>
+            </div>
+            <div class="category-grid">
+                <div class="category-card" onclick="searchByCategory('Oncology')">
+                    <div class="category-icon" style="background:var(--accent-blue-light)">🧬</div>
+                    <h3>Oncology</h3>
+                    <p>Cancer medications</p>
+                </div>
+                <div class="category-card" onclick="searchByCategory('Immunology')">
+                    <div class="category-icon" style="background:var(--accent-green-light)">🛡️</div>
+                    <h3>Immunology</h3>
+                    <p>Immune therapies</p>
+                </div>
+                <div class="category-card" onclick="searchByCategory('Blood Products')">
+                    <div class="category-icon" style="background:var(--accent-red-light)">🩸</div>
+                    <h3>Blood Products</h3>
+                    <p>All blood types</p>
+                </div>
+                <div class="category-card" onclick="searchByCategory('Rare Disease')">
+                    <div class="category-icon" style="background:var(--accent-amber-light)">💊</div>
+                    <h3>Rare Disease</h3>
+                    <p>Orphan drugs</p>
+                </div>
+                <div class="category-card" onclick="searchByCategory('Biologics')">
+                    <div class="category-icon" style="background:#F3E8FF">🔬</div>
+                    <h3>Biologics</h3>
+                    <p>Biologic agents</p>
+                </div>
+                <div class="category-card" onclick="searchByCategory('Antivenoms')">
+                    <div class="category-icon" style="background:#FFF7ED">🐍</div>
+                    <h3>Antivenoms</h3>
+                    <p>Anti-snake sera</p>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <section class="products">
+        <div class="container">
+            <div class="section-header">
+                <h2 class="section-title">Recently Listed</h2>
+                <a class="section-link" onclick="navigate('search')">See All →</a>
+            </div>
+            <div class="product-grid" id="featuredProducts"></div>
+        </div>
+    </section>
+
+    <section class="stats">
+        <div class="container">
+            <div class="stats-grid">
+                <div class="stat-item"><h3>2,400+</h3><p>Products Listed</p></div>
+                <div class="stat-item"><h3>180+</h3><p>Verified Sellers</p></div>
+                <div class="stat-item"><h3>36</h3><p>States Covered</p></div>
+                <div class="stat-item"><h3>98%</h3><p>Fulfillment Rate</p></div>
+            </div>
+        </div>
+    </section>
+
+    <section class="how-it-works">
+        <div class="container">
+            <h2 class="section-title" style="text-align:center">How MedSource Works</h2>
+            <div class="steps-grid">
+                <div class="step-card">
+                    <div class="step-number">1</div>
+                    <h3>Search</h3>
+                    <p>Find the medication or blood product you need by name, category, or blood type.</p>
+                </div>
+                <div class="step-card">
+                    <div class="step-number">2</div>
+                    <h3>Compare</h3>
+                    <p>View verified sellers, prices, and availability across multiple locations in Nigeria.</p>
+                </div>
+                <div class="step-card">
+                    <div class="step-number">3</div>
+                    <h3>Purchase or Inquire</h3>
+                    <p>Buy directly through secure payment or send an inquiry to the seller for custom orders.</p>
+                </div>
+                <div class="step-card">
+                    <div class="step-number">4</div>
+                    <h3>Receive</h3>
+                    <p>Coordinate delivery with the seller. Track your order status in your dashboard.</p>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <footer class="footer">
+        <div class="container">
+            <div class="footer-grid">
+                <div class="footer-brand">
+                    <span class="logo-text" style="color:white">Med<span>Source</span></span>
+                    <p>Nigeria's trusted marketplace for uncommon medications and blood products. Connecting verified suppliers with hospitals and patients nationwide.</p>
+                </div>
+                <div class="footer-col">
+                    <h4>Platform</h4>
+                    <a onclick="navigate('search')">Browse Products</a>
+                    <a onclick="navigate('register')">Become a Seller</a>
+                    <a>How It Works</a>
+                    <a>Pricing</a>
+                </div>
+                <div class="footer-col">
+                    <h4>Support</h4>
+                    <a>Help Center</a>
+                    <a>Contact Us</a>
+                    <a>Report an Issue</a>
+                    <a>FAQs</a>
+                </div>
+                <div class="footer-col">
+                    <h4>Legal</h4>
+                    <a>Terms of Service</a>
+                    <a>Privacy Policy</a>
+                    <a>NAFDAC Compliance</a>
+                    <a>Seller Verification</a>
+                </div>
+            </div>
+            <div class="footer-bottom">
+                <span>© 2026 MedSource. All rights reserved.</span>
+                <span>Built by Xdosdev</span>
+            </div>
+        </div>
+    </footer>
+</main>
+
+<!-- SEARCH / BROWSE PAGE -->
+<main id="page-search" class="page hidden">
+    <div class="container">
+        <h1 class="section-title" style="margin-bottom:8px">Browse Products</h1>
+        <p style="color:var(--text-secondary);margin-bottom:24px" id="searchResultsInfo">Showing all available products</p>
+        
+        <div style="display:flex;gap:12px;margin-bottom:28px;flex-wrap:wrap">
+            <div class="search-bar" style="flex:1;min-width:260px;box-shadow:var(--shadow-sm)">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+                <input type="text" id="browseSearch" placeholder="Search products..." onkeydown="if(event.key==='Enter')filterProducts()">
+                <button class="btn btn-primary btn-sm" onclick="filterProducts()">Search</button>
+            </div>
+            <select class="form-input" style="width:auto;min-width:160px" id="filterCategory" onchange="filterProducts()">
+                <option value="">All Categories</option>
+                <option value="Oncology">Oncology</option>
+                <option value="Immunology">Immunology</option>
+                <option value="Blood Products">Blood Products</option>
+                <option value="Rare Disease">Rare Disease</option>
+                <option value="Biologics">Biologics</option>
+                <option value="Antivenoms">Antivenoms</option>
+            </select>
+            <select class="form-input" style="width:auto;min-width:140px" id="filterLocation" onchange="filterProducts()">
+                <option value="">All Locations</option>
+                <option value="Lagos">Lagos</option>
+                <option value="Abuja">Abuja</option>
+                <option value="Port Harcourt">Port Harcourt</option>
+                <option value="Kano">Kano</option>
+                <option value="Ibadan">Ibadan</option>
+                <option value="Enugu">Enugu</option>
+            </select>
+        </div>
+
+        <div class="product-grid" id="searchResults"></div>
+    </div>
+</main>
+
+<!-- PRODUCT DETAIL PAGE -->
+<main id="page-product" class="page hidden">
+    <div class="container">
+        <button class="back-btn" onclick="navigate('search')">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><polyline points="15 18 9 12 15 6"/></svg>
+            Back to results
+        </button>
+        <div class="product-detail" id="productDetail"></div>
+    </div>
+</main>
+
+<!-- LOGIN PAGE -->
+<main id="page-login" class="page hidden">
+    <div class="container">
+        <div class="auth-container">
+            <div class="auth-card">
+                <h2>Welcome back</h2>
+                <p>Sign in to your MedSource account</p>
+                <div class="form-group">
+                    <label class="form-label">Email Address</label>
+                    <input type="email" class="form-input" id="loginEmail" placeholder="you@example.com">
+                </div>
+                <div class="form-group">
+                    <label class="form-label">Password</label>
+                    <input type="password" class="form-input" id="loginPassword" placeholder="••••••••">
+                </div>
+                <button class="btn btn-primary btn-full btn-lg" onclick="handleLogin()">Sign In</button>
+                <div class="auth-footer">
+                    Don't have an account? <a onclick="navigate('register')">Create one</a>
+                </div>
+            </div>
+        </div>
+    </div>
+</main>
+
+<!-- REGISTER PAGE -->
+<main id="page-register" class="page hidden">
+    <div class="container">
+        <div class="auth-container">
+            <div class="auth-card">
+                <h2>Create your account</h2>
+                <p>Join MedSource as a buyer or seller</p>
+                <div class="form-group">
+                    <label class="form-label">I want to</label>
+                    <select class="form-input" id="regRole">
+                        <option value="buyer">Buy medications & blood products</option>
+                        <option value="seller">Sell as a pharmaceutical company / blood bank</option>
+                    </select>
+                </div>
+                <div class="form-row">
+                    <div class="form-group">
+                        <label class="form-label">First Name</label>
+                        <input type="text" class="form-input" id="regFirstName" placeholder="First name">
+                    </div>
+                    <div class="form-group">
+                        <label class="form-label">Last Name</label>
+                        <input type="text" class="form-input" id="regLastName" placeholder="Last name">
+                    </div>
+                </div>
+                <div class="form-group">
+                    <label class="form-label">Email Address</label>
+                    <input type="email" class="form-input" id="regEmail" placeholder="you@example.com">
+                </div>
+                <div class="form-group">
+                    <label class="form-label">Phone Number</label>
+                    <input type="tel" class="form-input" id="regPhone" placeholder="+234 ...">
+                </div>
+                <div class="form-group">
+                    <label class="form-label">Password</label>
+                    <input type="password" class="form-input" id="regPassword" placeholder="Min. 8 characters">
+                </div>
+                <div class="form-group" id="regSellerFields" style="display:none">
+                    <label class="form-label">Business / Company Name</label>
+                    <input type="text" class="form-input" id="regCompany" placeholder="Company name">
+                    <div style="margin-top:12px">
+                        <label class="form-label">NAFDAC License Number</label>
+                        <input type="text" class="form-input" id="regNafdac" placeholder="NAFDAC-XXX-XXXX">
+                    </div>
+                    <div style="margin-top:12px">
+                        <label class="form-label">Location (State)</label>
+                        <select class="form-input" id="regState">
+                            <option value="">Select state</option>
+                            <option>Lagos</option>
+                            <option>Abuja</option>
+                            <option>Port Harcourt</option>
+                            <option>Kano</option>
+                            <option>Ibadan</option>
+                            <option>Enugu</option>
+                        </select>
+                    </div>
+                </div>
+                <button class="btn btn-primary btn-full btn-lg" style="margin-top:8px" onclick="handleRegister()">Create Account</button>
+                <div class="auth-footer">
+                    Already have an account? <a onclick="navigate('login')">Sign in</a>
+                </div>
+            </div>
+        </div>
+    </div>
+</main>
+
+<!-- DASHBOARD -->
+<div id="page-dashboard" class="hidden">
+    <div class="dashboard">
+        <aside class="sidebar" id="dashSidebar">
+            <nav class="sidebar-nav">
+                <button class="sidebar-link active" onclick="showDashTab('overview')" data-tab="overview">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/><rect x="14" y="14" width="7" height="7"/><rect x="3" y="14" width="7" height="7"/></svg>
+                    Overview
+                </button>
+                <button class="sidebar-link" onclick="showDashTab('products')" data-tab="products" id="sidebar-products">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16z"/></svg>
+                    My Products
+                </button>
+                <button class="sidebar-link" onclick="showDashTab('orders')" data-tab="orders">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M6 2L3 6v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2V6l-3-4z"/><line x1="3" y1="6" x2="21" y2="6"/><path d="M16 10a4 4 0 0 1-8 0"/></svg>
+                    Orders
+                </button>
+                <button class="sidebar-link" onclick="showDashTab('inquiries')" data-tab="inquiries">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>
+                    Inquiries
+                </button>
+                <button class="sidebar-link" onclick="showDashTab('add-product')" data-tab="add-product" id="sidebar-add-product">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+                    Add Product
+                </button>
+            </nav>
+        </aside>
+        <div class="dash-content">
+            <!-- OVERVIEW TAB -->
+            <div id="dash-overview">
+                <div class="dash-header">
+                    <h1 id="dashGreeting">Welcome back</h1>
+                </div>
+                <div class="dash-stats" id="dashStats"></div>
+                <div class="table-container">
+                    <div class="table-header">
+                        <h3>Recent Activity</h3>
+                    </div>
+                    <table>
+                        <thead>
+                            <tr><th>Date</th><th>Type</th><th>Product</th><th>Amount</th><th>Status</th></tr>
+                        </thead>
+                        <tbody id="dashActivity"></tbody>
+                    </table>
+                </div>
+            </div>
+
+            <!-- MY PRODUCTS TAB -->
+            <div id="dash-products" class="hidden">
+                <div class="dash-header">
+                    <h1>My Products</h1>
+                    <button class="btn btn-primary" onclick="showDashTab('add-product')">
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+                        Add Product
+                    </button>
+                </div>
+                <div class="table-container">
+                    <table>
+                        <thead>
+                            <tr><th>Product</th><th>Category</th><th>Price</th><th>Stock</th><th>Status</th><th>Actions</th></tr>
+                        </thead>
+                        <tbody id="sellerProducts"></tbody>
+                    </table>
+                </div>
+            </div>
+
+            <!-- ORDERS TAB -->
+            <div id="dash-orders" class="hidden">
+                <div class="dash-header"><h1>Orders</h1></div>
+                <div class="table-container">
+                    <table>
+                        <thead>
+                            <tr><th>Order ID</th><th>Product</th><th>Buyer/Seller</th><th>Amount</th><th>Date</th><th>Status</th></tr>
+                        </thead>
+                        <tbody id="ordersTable"></tbody>
+                    </table>
+                </div>
+            </div>
+
+            <!-- INQUIRIES TAB -->
+            <div id="dash-inquiries" class="hidden">
+                <div class="dash-header"><h1>Inquiries</h1></div>
+                <div class="table-container">
+                    <table>
+                        <thead>
+                            <tr><th>Date</th><th>Product</th><th>From/To</th><th>Message</th><th>Status</th></tr>
+                        </thead>
+                        <tbody id="inquiriesTable"></tbody>
+                    </table>
+                </div>
+            </div>
+
+            <!-- ADD PRODUCT TAB -->
+            <div id="dash-add-product" class="hidden">
+                <div class="dash-header"><h1>Add New Product</h1></div>
+                <div class="form-card">
+                    <div class="form-group">
+                        <label class="form-label">Product Type</label>
+                        <select class="form-input" id="addType" onchange="toggleBloodFields()">
+                            <option value="pharmaceutical">Pharmaceutical</option>
+                            <option value="blood">Blood Product</option>
+                        </select>
+                    </div>
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label class="form-label">Product Name</label>
+                            <input type="text" class="form-input" id="addName" placeholder="e.g. Rituximab 500mg">
+                        </div>
+                        <div class="form-group">
+                            <label class="form-label">Category</label>
+                            <select class="form-input" id="addCategory">
+                                <option>Oncology</option>
+                                <option>Immunology</option>
+                                <option>Rare Disease</option>
+                                <option>Biologics</option>
+                                <option>Antivenoms</option>
+                            </select>
+                        </div>
+                    </div>
+                    <div id="bloodFields" class="hidden">
+                        <div class="form-row">
+                            <div class="form-group">
+                                <label class="form-label">Blood Type</label>
+                                <select class="form-input" id="addBloodType">
+                                    <option>A+</option><option>A-</option><option>B+</option><option>B-</option>
+                                    <option>AB+</option><option>AB-</option><option>O+</option><option>O-</option>
+                                </select>
+                            </div>
+                            <div class="form-group">
+                                <label class="form-label">Component</label>
+                                <select class="form-input" id="addBloodComponent">
+                                    <option>Whole Blood</option>
+                                    <option>Packed Red Cells</option>
+                                    <option>Platelets</option>
+                                    <option>Fresh Frozen Plasma</option>
+                                    <option>Cryoprecipitate</option>
+                                </select>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label class="form-label">Price (₦)</label>
+                            <input type="number" class="form-input" id="addPrice" placeholder="0.00">
+                        </div>
+                        <div class="form-group">
+                            <label class="form-label">Quantity Available</label>
+                            <input type="number" class="form-input" id="addQty" placeholder="0">
+                        </div>
+                    </div>
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label class="form-label">NAFDAC Registration No.</label>
+                            <input type="text" class="form-input" id="addNafdac" placeholder="NAFDAC-XXX-XXXX">
+                        </div>
+                        <div class="form-group">
+                            <label class="form-label">Expiry Date</label>
+                            <input type="date" class="form-input" id="addExpiry">
+                        </div>
+                    </div>
+                    <div class="form-group">
+                        <label class="form-label">Description</label>
+                        <textarea class="form-input" id="addDesc" placeholder="Product description, storage requirements, dosage information..."></textarea>
+                    </div>
+                    <div style="display:flex;gap:12px;margin-top:8px">
+                        <button class="btn btn-primary btn-lg" onclick="handleAddProduct()">Publish Product</button>
+                        <button class="btn btn-secondary btn-lg" onclick="showDashTab('products')">Cancel</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- INQUIRY MODAL -->
+<div class="modal-overlay hidden" id="inquiryModal" onclick="if(event.target===this)closeInquiry()">
+    <div class="modal">
+        <h2>Send Inquiry</h2>
+        <p id="inquiryProductName">About this product</p>
+        <div class="form-group">
+            <label class="form-label">Your Name</label>
+            <input type="text" class="form-input" id="inquiryName" placeholder="Full name">
+        </div>
+        <div class="form-group">
+            <label class="form-label">Phone Number</label>
+            <input type="tel" class="form-input" id="inquiryPhone" placeholder="+234...">
+        </div>
+        <div class="form-group">
+            <label class="form-label">Quantity Needed</label>
+            <input type="number" class="form-input" id="inquiryQty" placeholder="Enter quantity">
+        </div>
+        <div class="form-group">
+            <label class="form-label">Message</label>
+            <textarea class="form-input" id="inquiryMsg" placeholder="Any special requirements or questions..."></textarea>
+        </div>
+        <div style="display:flex;gap:12px">
+            <button class="btn btn-primary btn-lg" style="flex:1" onclick="submitInquiry()">Send Inquiry</button>
+            <button class="btn btn-secondary btn-lg" onclick="closeInquiry()">Cancel</button>
+        </div>
+    </div>
+</div>
+
+<!-- TOAST CONTAINER -->
+<div id="toastContainer"></div>
+
+<script>
+// ===== DATA =====
+const PRODUCTS = [
+    { id: 1, name: "Rituximab 500mg/50ml", type: "pharmaceutical", category: "Oncology", price: 485000, qty: 12, seller: "PharmaVault Ltd", sellerInitial: "PV", location: "Lagos", nafdac: "A7-0234", expiry: "2027-03-15", verified: true, emoji: "💉", desc: "Monoclonal antibody for non-Hodgkin's lymphoma and chronic lymphocytic leukemia. Store at 2-8°C. Do not freeze." },
+    { id: 2, name: "Blood Type O- (Packed Red Cells)", type: "blood", category: "Blood Products", bloodType: "O-", component: "Packed Red Cells", price: 35000, qty: 8, seller: "LifeBlood Bank", sellerInitial: "LB", location: "Lagos", nafdac: "B2-1187", expiry: "2026-03-25", verified: true, emoji: "🩸", desc: "Universal donor packed red blood cells. Screened for HIV, Hepatitis B&C, Syphilis. Stored at 2-6°C." },
+    { id: 3, name: "Immunoglobulin IV 5g", type: "pharmaceutical", category: "Immunology", price: 220000, qty: 20, seller: "MedLine Pharma", sellerInitial: "ML", location: "Abuja", nafdac: "A5-3321", expiry: "2027-08-01", verified: true, emoji: "🛡️", desc: "Intravenous immunoglobulin for primary immunodeficiency, Kawasaki disease, and ITP. Refrigerate at 2-8°C." },
+    { id: 4, name: "Cyclophosphamide 1g Injection", type: "pharmaceutical", category: "Oncology", price: 18500, qty: 50, seller: "PharmaVault Ltd", sellerInitial: "PV", location: "Lagos", nafdac: "A7-0235", expiry: "2027-11-20", verified: true, emoji: "🧬", desc: "Alkylating agent for cancer chemotherapy and autoimmune disorders. Store below 25°C." },
+    { id: 5, name: "Anti-D Immunoglobulin 300mcg", type: "pharmaceutical", category: "Immunology", price: 45000, qty: 15, seller: "CareFirst Pharma", sellerInitial: "CF", location: "Port Harcourt", nafdac: "A3-8842", expiry: "2027-06-10", verified: true, emoji: "💊", desc: "For prevention of Rh immunization in Rh-negative mothers. Intramuscular injection. Refrigerate." },
+    { id: 6, name: "Blood Type AB- (Fresh Frozen Plasma)", type: "blood", category: "Blood Products", bloodType: "AB-", component: "Fresh Frozen Plasma", price: 28000, qty: 5, seller: "National Blood Centre", sellerInitial: "NB", location: "Abuja", nafdac: "B1-0098", expiry: "2026-04-10", verified: true, emoji: "🩸", desc: "Rare blood type plasma for coagulation factor replacement. Stored at -18°C or below. Must thaw before use." },
+    { id: 7, name: "Eculizumab 300mg/30ml", type: "pharmaceutical", category: "Rare Disease", price: 2800000, qty: 3, seller: "RareMed Nigeria", sellerInitial: "RM", location: "Lagos", nafdac: "A9-5501", expiry: "2027-09-30", verified: true, emoji: "🔬", desc: "For paroxysmal nocturnal hemoglobinuria (PNH) and atypical hemolytic uremic syndrome. IV infusion. Refrigerate." },
+    { id: 8, name: "Polyvalent Snake Antivenom", type: "pharmaceutical", category: "Antivenoms", price: 75000, qty: 30, seller: "TropMed Supplies", sellerInitial: "TM", location: "Kano", nafdac: "A4-6677", expiry: "2028-01-15", verified: true, emoji: "🐍", desc: "Effective against Nigerian cobra, puff adder, carpet viper, and black mamba. IV administration. Store at 2-8°C." },
+    { id: 9, name: "Blood Type B- (Platelets)", type: "blood", category: "Blood Products", bloodType: "B-", component: "Platelets", price: 42000, qty: 6, seller: "LifeBlood Bank", sellerInitial: "LB", location: "Lagos", nafdac: "B2-1190", expiry: "2026-02-20", verified: false, emoji: "🩸", desc: "Single donor apheresis platelets. Must be used within 5 days of collection. Store at 20-24°C with agitation." },
+    { id: 10, name: "Tocilizumab 400mg/20ml", type: "pharmaceutical", category: "Biologics", price: 380000, qty: 8, seller: "BioPharm Hub", sellerInitial: "BP", location: "Ibadan", nafdac: "A8-2210", expiry: "2027-05-25", verified: true, emoji: "🔬", desc: "IL-6 receptor inhibitor for rheumatoid arthritis and cytokine release syndrome. IV infusion. Refrigerate." },
+    { id: 11, name: "Imatinib 400mg Tablets (30)", type: "pharmaceutical", category: "Oncology", price: 95000, qty: 25, seller: "MedLine Pharma", sellerInitial: "ML", location: "Abuja", nafdac: "A5-3340", expiry: "2028-02-28", verified: true, emoji: "💊", desc: "Tyrosine kinase inhibitor for chronic myeloid leukemia (CML) and GI stromal tumors. Store below 30°C." },
+    { id: 12, name: "Blood Type O+ (Whole Blood)", type: "blood", category: "Blood Products", bloodType: "O+", component: "Whole Blood", price: 25000, qty: 20, seller: "National Blood Centre", sellerInitial: "NB", location: "Enugu", nafdac: "B1-0102", expiry: "2026-03-05", verified: true, emoji: "🩸", desc: "Screened whole blood for transfusion. Compatible with O+, A+, B+, AB+ recipients. Stored at 2-6°C." },
+];
+
+let currentUser = null;
+let currentPage = 'home';
+
+// ===== NAVIGATION =====
+function navigate(page, data) {
+    document.querySelectorAll('main, #page-dashboard').forEach(el => el.classList.add('hidden'));
+    const target = document.getElementById('page-' + page);
+    if (target) {
+        target.classList.remove('hidden');
+        currentPage = page;
+    }
+    
+    // Update nav active state
+    document.querySelectorAll('.nav-link').forEach(l => l.classList.remove('active'));
+    document.querySelector(`.nav-link[onclick="navigate('${page}')"]`)?.classList.add('active');
+    
+    window.scrollTo(0, 0);
+    closeMobileMenu();
+
+    if (page === 'home') renderFeatured();
+    if (page === 'search') renderSearch();
+    if (page === 'product') renderProductDetail(data);
+    if (page === 'dashboard') renderDashboard();
+}
+
+function toggleMobileMenu() {
+    document.getElementById('navLinks').classList.toggle('open');
+}
+function closeMobileMenu() {
+    document.getElementById('navLinks').classList.remove('open');
+}
+
+// ===== SEARCH =====
+function doSearch() {
+    const q = document.getElementById('heroSearch').value;
+    navigate('search');
+    document.getElementById('browseSearch').value = q;
+    filterProducts();
+}
+function quickSearch(term) {
+    document.getElementById('heroSearch').value = term;
+    doSearch();
+}
+function searchByCategory(cat) {
+    navigate('search');
+    document.getElementById('filterCategory').value = cat;
+    filterProducts();
+}
+
+function filterProducts() {
+    const q = document.getElementById('browseSearch').value.toLowerCase();
+    const cat = document.getElementById('filterCategory').value;
+    const loc = document.getElementById('filterLocation').value;
+    
+    let filtered = PRODUCTS.filter(p => {
+        const matchQ = !q || p.name.toLowerCase().includes(q) || p.category.toLowerCase().includes(q) || 
+                       (p.bloodType && p.bloodType.toLowerCase().includes(q)) || p.seller.toLowerCase().includes(q);
+        const matchCat = !cat || p.category === cat;
+        const matchLoc = !loc || p.location === loc;
+        return matchQ && matchCat && matchLoc;
+    });
+
+    const info = document.getElementById('searchResultsInfo');
+    info.textContent = filtered.length ? `Showing ${filtered.length} product${filtered.length > 1 ? 's' : ''}` : 'No products found. Try adjusting your search.';
+    
+    renderProductGrid('searchResults', filtered);
+}
+
+function renderSearch() {
+    filterProducts();
+}
+
+// ===== PRODUCT RENDERING =====
+function renderProductGrid(containerId, products) {
+    const container = document.getElementById(containerId);
+    container.innerHTML = products.map(p => `
+        <div class="product-card" onclick="navigate('product', ${p.id})">
+            <div class="product-img">
+                ${p.emoji}
+                <span class="product-badge ${p.type === 'blood' ? 'badge-blood' : 'badge-pharma'}">
+                    ${p.type === 'blood' ? '🩸 Blood' : '💊 Pharma'}
+                </span>
+                ${p.verified ? `<span class="badge-verified"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><polyline points="20 6 9 17 4 12"/></svg>Verified</span>` : ''}
+            </div>
+            <div class="product-info">
+                <h3>${p.name}</h3>
+                <div class="product-meta">${p.category}${p.bloodType ? ' • ' + p.bloodType : ''} • ${p.qty} available</div>
+                <div class="product-footer">
+                    <span class="product-price">₦${p.price.toLocaleString()}</span>
+                    <span class="product-location">
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"/><circle cx="12" cy="10" r="3"/></svg>
+                        ${p.location}
+                    </span>
+                </div>
+            </div>
+        </div>
+    `).join('');
+}
+
+function renderFeatured() {
+    renderProductGrid('featuredProducts', PRODUCTS.slice(0, 6));
+}
+
+// ===== PRODUCT DETAIL =====
+function renderProductDetail(productId) {
+    const p = PRODUCTS.find(x => x.id === productId);
+    if (!p) return;
+    
+    document.getElementById('productDetail').innerHTML = `
+        <div class="product-detail-img">${p.emoji}</div>
+        <div class="product-detail-info">
+            <div style="display:flex;gap:8px;margin-bottom:12px">
+                <span class="product-badge ${p.type === 'blood' ? 'badge-blood' : 'badge-pharma'}" style="position:static">
+                    ${p.type === 'blood' ? '🩸 Blood Product' : '💊 Pharmaceutical'}
+                </span>
+                ${p.verified ? `<span class="badge-verified" style="position:static"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><polyline points="20 6 9 17 4 12"/></svg>NAFDAC Verified</span>` : ''}
+            </div>
+            <h1>${p.name}</h1>
+            <div class="product-meta">${p.category}${p.bloodType ? ' • Blood Type: ' + p.bloodType : ''}${p.component ? ' • ' + p.component : ''}</div>
+            <div class="detail-price">₦${p.price.toLocaleString()}</div>
+            <p style="color:var(--text-secondary);font-size:0.92rem;margin-bottom:24px">${p.desc}</p>
+            
+            <div class="detail-section">
+                <h3>Product Details</h3>
+                <div class="detail-row"><span>NAFDAC Reg. No.</span><span>${p.nafdac}</span></div>
+                <div class="detail-row"><span>Available Quantity</span><span>${p.qty} units</span></div>
+                <div class="detail-row"><span>Expiry Date</span><span>${new Date(p.expiry).toLocaleDateString('en-NG', {year:'numeric',month:'long',day:'numeric'})}</span></div>
+                <div class="detail-row"><span>Location</span><span>${p.location}, Nigeria</span></div>
+            </div>
+
+            <div class="detail-actions">
+                <button class="btn btn-primary btn-lg" style="flex:1" onclick="handleBuyNow(${p.id})">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M6 2L3 6v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2V6l-3-4z"/><line x1="3" y1="6" x2="21" y2="6"/><path d="M16 10a4 4 0 0 1-8 0"/></svg>
+                    Buy Now
+                </button>
+                <button class="btn btn-outline btn-lg" style="flex:1" onclick="openInquiry(${p.id})">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>
+                    Send Inquiry
+                </button>
+            </div>
+
+            <div class="seller-card">
+                <div class="seller-header">
+                    <div class="seller-avatar">${p.sellerInitial}</div>
+                    <div>
+                        <div class="seller-name">${p.seller}</div>
+                        <div class="seller-verified">
+                            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><polyline points="20 6 9 17 4 12"/></svg>
+                            Verified Seller
+                        </div>
+                    </div>
+                </div>
+                <div class="seller-stats">
+                    <span>📍 ${p.location}</span>
+                    <span>⭐ 4.8 rating</span>
+                    <span>📦 ${Math.floor(Math.random()*200+50)} orders</span>
+                </div>
+            </div>
+        </div>
+    `;
+}
+
+// ===== AUTH =====
+function handleLogin() {
+    const email = document.getElementById('loginEmail').value;
+    const pass = document.getElementById('loginPassword').value;
+    if (!email || !pass) return showToast('Please fill in all fields', 'error');
+    
+    // Demo login
+    currentUser = { 
+        name: 'Demo User', 
+        email: email, 
+        role: email.includes('seller') ? 'seller' : 'buyer' 
+    };
+    updateAuthUI();
+    showToast('Welcome back!', 'success');
+    navigate('dashboard');
+}
+
+function handleRegister() {
+    const role = document.getElementById('regRole').value;
+    const first = document.getElementById('regFirstName').value;
+    const last = document.getElementById('regLastName').value;
+    const email = document.getElementById('regEmail').value;
+    const phone = document.getElementById('regPhone').value;
+    const pass = document.getElementById('regPassword').value;
+    
+    if (!first || !last || !email || !phone || !pass) return showToast('Please fill in all required fields', 'error');
+    
+    currentUser = { name: first + ' ' + last, email, role, phone };
+    
+    if (role === 'seller') {
+        currentUser.company = document.getElementById('regCompany').value;
+        currentUser.nafdac = document.getElementById('regNafdac').value;
+        currentUser.state = document.getElementById('regState').value;
+    }
+    
+    updateAuthUI();
+    showToast('Account created successfully!', 'success');
+    navigate('dashboard');
+}
+
+function logout() {
+    currentUser = null;
+    updateAuthUI();
+    showToast('Signed out', 'success');
+    navigate('home');
+}
+
+function updateAuthUI() {
+    const authLinks = document.getElementById('nav-auth-links');
+    const userLinks = document.getElementById('nav-user-links');
+    if (currentUser) {
+        authLinks.classList.add('hidden');
+        userLinks.classList.remove('hidden');
+        userLinks.style.display = 'inline-flex';
+    } else {
+        authLinks.classList.remove('hidden');
+        userLinks.classList.add('hidden');
+    }
+}
+
+// Register page - toggle seller fields
+document.getElementById('regRole').addEventListener('change', function() {
+    document.getElementById('regSellerFields').style.display = this.value === 'seller' ? 'block' : 'none';
+});
+
+// ===== DASHBOARD =====
+function renderDashboard() {
+    if (!currentUser) { navigate('login'); return; }
+    
+    const isSeller = currentUser.role === 'seller';
+    document.getElementById('dashGreeting').textContent = `Welcome, ${currentUser.name.split(' ')[0]}`;
+    
+    // Show/hide seller-specific tabs
+    document.getElementById('sidebar-products').style.display = isSeller ? 'flex' : 'none';
+    document.getElementById('sidebar-add-product').style.display = isSeller ? 'flex' : 'none';
+    
+    // Stats
+    const statsHtml = isSeller ? `
+        <div class="dash-stat-card"><p>Total Products</p><h3>24</h3><div class="trend trend-up">↑ 3 this month</div></div>
+        <div class="dash-stat-card"><p>Total Orders</p><h3>156</h3><div class="trend trend-up">↑ 12%</div></div>
+        <div class="dash-stat-card"><p>Revenue</p><h3>₦4.2M</h3><div class="trend trend-up">↑ 8.5%</div></div>
+        <div class="dash-stat-card"><p>Pending Inquiries</p><h3>7</h3><div class="trend trend-down">↓ 2 from last week</div></div>
+    ` : `
+        <div class="dash-stat-card"><p>Total Orders</p><h3>12</h3><div class="trend trend-up">↑ 2 this month</div></div>
+        <div class="dash-stat-card"><p>Total Spent</p><h3>₦1.8M</h3></div>
+        <div class="dash-stat-card"><p>Active Inquiries</p><h3>3</h3></div>
+        <div class="dash-stat-card"><p>Saved Products</p><h3>8</h3></div>
+    `;
+    document.getElementById('dashStats').innerHTML = statsHtml;
+    
+    // Activity
+    document.getElementById('dashActivity').innerHTML = `
+        <tr><td>Feb 12, 2026</td><td><span class="status-badge status-completed">Order</span></td><td>Rituximab 500mg</td><td>₦485,000</td><td><span class="status-badge status-active">Completed</span></td></tr>
+        <tr><td>Feb 11, 2026</td><td><span class="status-badge status-pending">Inquiry</span></td><td>Blood Type O-</td><td>—</td><td><span class="status-badge status-pending">Pending</span></td></tr>
+        <tr><td>Feb 10, 2026</td><td><span class="status-badge status-completed">Order</span></td><td>Anti-D Immunoglobulin</td><td>₦90,000</td><td><span class="status-badge status-active">Completed</span></td></tr>
+        <tr><td>Feb 8, 2026</td><td><span class="status-badge status-completed">Order</span></td><td>Snake Antivenom</td><td>₦75,000</td><td><span class="status-badge status-active">Delivered</span></td></tr>
+    `;
+    
+    // Seller products
+    if (isSeller) {
+        document.getElementById('sellerProducts').innerHTML = PRODUCTS.slice(0,5).map(p => `
+            <tr>
+                <td style="font-weight:500">${p.emoji} ${p.name}</td>
+                <td>${p.category}</td>
+                <td>₦${p.price.toLocaleString()}</td>
+                <td>${p.qty}</td>
+                <td><span class="status-badge status-active">Active</span></td>
+                <td><button class="btn btn-secondary btn-sm">Edit</button></td>
+            </tr>
+        `).join('');
+    }
+    
+    // Orders
+    document.getElementById('ordersTable').innerHTML = `
+        <tr><td style="font-weight:500">#MS-2601</td><td>Rituximab 500mg</td><td>Lagos General Hospital</td><td>₦485,000</td><td>Feb 12</td><td><span class="status-badge status-active">Completed</span></td></tr>
+        <tr><td style="font-weight:500">#MS-2598</td><td>Anti-D Immunoglobulin x2</td><td>CareFirst Pharma</td><td>₦90,000</td><td>Feb 10</td><td><span class="status-badge status-active">Completed</span></td></tr>
+        <tr><td style="font-weight:500">#MS-2595</td><td>Cyclophosphamide 1g x5</td><td>MedLine Pharma</td><td>₦92,500</td><td>Feb 8</td><td><span class="status-badge status-pending">Processing</span></td></tr>
+    `;
+    
+    // Inquiries
+    document.getElementById('inquiriesTable').innerHTML = `
+        <tr><td>Feb 11</td><td>Blood Type O-</td><td>Dr. Adebayo</td><td>Need 4 units urgently for surgery</td><td><span class="status-badge status-pending">Pending</span></td></tr>
+        <tr><td>Feb 9</td><td>Eculizumab 300mg</td><td>LUTH Pharmacy</td><td>Inquiry about bulk pricing</td><td><span class="status-badge status-active">Replied</span></td></tr>
+    `;
+    
+    showDashTab('overview');
+}
+
+function showDashTab(tab) {
+    ['overview','products','orders','inquiries','add-product'].forEach(t => {
+        const el = document.getElementById('dash-' + t);
+        if (el) el.classList.toggle('hidden', t !== tab);
+    });
+    document.querySelectorAll('.sidebar-link').forEach(l => {
+        l.classList.toggle('active', l.dataset.tab === tab);
+    });
+}
+
+function toggleBloodFields() {
+    document.getElementById('bloodFields').classList.toggle('hidden', document.getElementById('addType').value !== 'blood');
+}
+
+function handleAddProduct() {
+    const name = document.getElementById('addName').value;
+    const price = document.getElementById('addPrice').value;
+    if (!name || !price) return showToast('Please fill in required fields', 'error');
+    showToast('Product published successfully!', 'success');
+    showDashTab('products');
+}
+
+// ===== BUY / INQUIRY =====
+function handleBuyNow(productId) {
+    if (!currentUser) {
+        showToast('Please sign in to purchase', 'error');
+        navigate('login');
+        return;
+    }
+    const p = PRODUCTS.find(x => x.id === productId);
+    showToast(`Order placed for ${p.name}! ₦${p.price.toLocaleString()}`, 'success');
+}
+
+function openInquiry(productId) {
+    const p = PRODUCTS.find(x => x.id === productId);
+    document.getElementById('inquiryProductName').textContent = `About: ${p.name}`;
+    document.getElementById('inquiryModal').classList.remove('hidden');
+    document.getElementById('inquiryModal').dataset.productId = productId;
+}
+function closeInquiry() {
+    document.getElementById('inquiryModal').classList.add('hidden');
+}
+function submitInquiry() {
+    const name = document.getElementById('inquiryName').value;
+    const msg = document.getElementById('inquiryMsg').value;
+    if (!name) return showToast('Please enter your name', 'error');
+    closeInquiry();
+    showToast('Inquiry sent successfully! The seller will respond shortly.', 'success');
+}
+
+// ===== TOAST =====
+function showToast(message, type = 'success') {
+    const toast = document.createElement('div');
+    toast.className = `toast ${type}`;
+    toast.innerHTML = `${type === 'success' ? '✓' : '✕'} ${message}`;
+    document.getElementById('toastContainer').appendChild(toast);
+    setTimeout(() => toast.remove(), 3500);
+}
+
+// ===== INIT =====
+navigate('home');
+</script>
+
+</body>
+</html>

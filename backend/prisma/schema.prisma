@@ -1,0 +1,414 @@
+// MedSource Database Schema
+// PostgreSQL + Prisma ORM
+
+generator client {
+  provider        = "prisma-client-js"
+  previewFeatures = ["fullTextSearch", "fullTextIndex"]
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+// ============================================================
+// USER & AUTH
+// ============================================================
+
+enum UserRole {
+  BUYER
+  SELLER
+  SUPER_ADMIN
+  SUB_ADMIN
+}
+
+enum AccountType {
+  INDIVIDUAL
+  HOSPITAL
+  PHARMACY
+  BLOOD_BANK
+  DISTRIBUTOR
+}
+
+model User {
+  id            String      @id @default(cuid())
+  phone         String?     @unique
+  email         String?     @unique
+  passwordHash  String?
+  googleId      String?     @unique
+  firstName     String
+  lastName      String
+  role          UserRole    @default(BUYER)
+  accountType   AccountType @default(INDIVIDUAL)
+  avatar        String?
+  isVerified    Boolean     @default(false)
+  isActive      Boolean     @default(true)
+  fcmToken      String?     // Firebase Cloud Messaging token
+  
+  // Location
+  state         String?
+  city          String?
+  address       String?
+  latitude      Float?
+  longitude     Float?
+
+  createdAt     DateTime    @default(now())
+  updatedAt     DateTime    @updatedAt
+
+  // Relations
+  seller        Seller?
+  orders        Order[]
+  inquiriesSent Inquiry[]   @relation("BuyerInquiries")
+  notifications Notification[]
+  otpCodes      OtpCode[]
+  reviews       Review[]
+
+  @@index([phone])
+  @@index([state, city])
+}
+
+model OtpCode {
+  id        String   @id @default(cuid())
+  userId    String?
+  phone     String
+  code      String
+  purpose   String   @default("login") // login, register, verify
+  expiresAt DateTime
+  used      Boolean  @default(false)
+  createdAt DateTime @default(now())
+
+  user      User?    @relation(fields: [userId], references: [id])
+
+  @@index([phone, code])
+}
+
+// ============================================================
+// SELLER
+// ============================================================
+
+model Seller {
+  id              String      @id @default(cuid())
+  userId          String      @unique
+  businessName    String
+  businessType    AccountType
+  description     String?
+  logo            String?
+  
+  // Verification
+  isVerified      Boolean     @default(false)
+  nafdacLicense   String?     // Seller's NAFDAC license number
+  cacNumber       String?     // CAC registration number
+  verifiedAt      DateTime?
+  
+  // Location
+  state           String
+  city            String
+  address         String
+  latitude        Float?
+  longitude       Float?
+  
+  // Contact
+  businessPhone   String
+  businessEmail   String?
+  whatsapp        String?
+
+  // Stats
+  rating          Float       @default(0)
+  totalSales      Int         @default(0)
+  responseTime    Int?        // Average response time in minutes
+
+  createdAt       DateTime    @default(now())
+  updatedAt       DateTime    @updatedAt
+
+  // Relations
+  user            User        @relation(fields: [userId], references: [id])
+  products        Product[]
+  orders          Order[]     @relation("SellerOrders")
+  inquiries       Inquiry[]   @relation("SellerInquiries")
+  reviews         Review[]
+
+  @@index([state, city])
+  @@index([isVerified])
+  @@index([businessType])
+}
+
+// ============================================================
+// PRODUCTS
+// ============================================================
+
+enum ProductType {
+  PHARMACEUTICAL
+  BLOOD_PRODUCT
+}
+
+enum BloodProductType {
+  WHOLE_BLOOD
+  PACKED_RED_CELLS
+  FRESH_FROZEN_PLASMA
+  PLATELET_CONCENTRATE
+  CRYOPRECIPITATE
+}
+
+model Product {
+  id              String          @id @default(cuid())
+  sellerId        String
+  type            ProductType
+  
+  // Common fields
+  name            String
+  description     String?
+  price           Float
+  currency        String          @default("NGN")
+  quantity        Int             @default(0)
+  inStock         Boolean         @default(true)
+  images          String[]        // Cloudinary URLs
+  
+  // Pharmaceutical specific
+  genericName     String?
+  category        String?         // Oncology, Rare Disease, Anti-infective, etc.
+  dosageForm      String?         // Tablet, Injection, IV, etc.
+  strength        String?         // 500mg, 10ml, etc.
+  manufacturer    String?
+  nafdacNumber    String?
+  nafdacVerified  Boolean         @default(false)
+  batchNumber     String?
+  expiryDate      DateTime?
+  
+  // Blood product specific
+  bloodType       String?         // A+, A-, B+, B-, AB+, AB-, O+, O-
+  bloodProduct    BloodProductType?
+  screeningStatus String?         // Fully Screened, Pending
+  coldChain       Boolean         @default(false)
+  collectionDate  DateTime?
+  storageTemp     String?         // e.g. "2-6°C", "-18°C"
+  
+  // Search & discovery
+  tags            String[]
+  isActive        Boolean         @default(true)
+  isFeatured      Boolean         @default(false)
+  viewCount       Int             @default(0)
+
+  createdAt       DateTime        @default(now())
+  updatedAt       DateTime        @updatedAt
+
+  // Relations
+  seller          Seller          @relation(fields: [sellerId], references: [id])
+  orderItems      OrderItem[]
+  inquiries       Inquiry[]
+
+  @@index([type])
+  @@index([category])
+  @@index([bloodType])
+  @@index([name])
+  @@index([sellerId])
+  @@index([inStock, isActive])
+  @@index([nafdacNumber])
+}
+
+// ============================================================
+// ORDERS & PAYMENTS
+// ============================================================
+
+enum OrderStatus {
+  PENDING
+  CONFIRMED
+  PROCESSING
+  READY_FOR_PICKUP
+  IN_TRANSIT
+  DELIVERED
+  CANCELLED
+  REFUNDED
+}
+
+enum PaymentStatus {
+  PENDING
+  PAID
+  FAILED
+  REFUNDED
+}
+
+enum PaymentProvider {
+  PAYSTACK
+  FLUTTERWAVE
+  BANK_TRANSFER
+}
+
+model Order {
+  id              String         @id @default(cuid())
+  orderNumber     String         @unique // MSN-20260213-XXXX
+  buyerId         String
+  sellerId        String
+  
+  // Pricing
+  subtotal        Float
+  deliveryFee     Float          @default(0)
+  serviceFee      Float          @default(0)
+  totalAmount     Float
+  currency        String         @default("NGN")
+  
+  // Status
+  status          OrderStatus    @default(PENDING)
+  paymentStatus   PaymentStatus  @default(PENDING)
+  paymentProvider PaymentProvider?
+  paymentRef      String?        // Paystack/Flutterwave reference
+  paidAt          DateTime?
+  
+  // Delivery
+  deliveryAddress String?
+  deliveryState   String?
+  deliveryCity    String?
+  deliveryPhone   String?
+  deliveryNotes   String?
+  
+  // Timestamps
+  confirmedAt     DateTime?
+  shippedAt       DateTime?
+  deliveredAt     DateTime?
+  cancelledAt     DateTime?
+  
+  createdAt       DateTime       @default(now())
+  updatedAt       DateTime       @updatedAt
+
+  // Relations
+  buyer           User           @relation(fields: [buyerId], references: [id])
+  seller          Seller         @relation("SellerOrders", fields: [sellerId], references: [id])
+  items           OrderItem[]
+  payment         Payment?
+  notifications   Notification[]
+
+  @@index([buyerId])
+  @@index([sellerId])
+  @@index([status])
+  @@index([orderNumber])
+}
+
+model OrderItem {
+  id          String  @id @default(cuid())
+  orderId     String
+  productId   String
+  quantity    Int
+  unitPrice   Float
+  totalPrice  Float
+
+  order       Order   @relation(fields: [orderId], references: [id])
+  product     Product @relation(fields: [productId], references: [id])
+
+  @@index([orderId])
+}
+
+model Payment {
+  id              String         @id @default(cuid())
+  orderId         String         @unique
+  provider        PaymentProvider
+  reference       String         @unique  // Provider's transaction reference
+  amount          Float
+  currency        String         @default("NGN")
+  status          PaymentStatus  @default(PENDING)
+  providerData    Json?          // Full response from provider
+  
+  paidAt          DateTime?
+  createdAt       DateTime       @default(now())
+  updatedAt       DateTime       @updatedAt
+
+  order           Order          @relation(fields: [orderId], references: [id])
+
+  @@index([reference])
+}
+
+// ============================================================
+// INQUIRIES
+// ============================================================
+
+enum InquiryStatus {
+  PENDING
+  RESPONDED
+  CLOSED
+}
+
+model Inquiry {
+  id          String        @id @default(cuid())
+  buyerId     String
+  sellerId    String
+  productId   String
+  
+  // Inquiry details
+  buyerName   String
+  buyerPhone  String
+  message     String
+  quantity    Int?
+  urgency     String?       // routine, urgent, emergency
+  
+  // Response
+  status      InquiryStatus @default(PENDING)
+  response    String?
+  respondedAt DateTime?
+  
+  createdAt   DateTime      @default(now())
+  updatedAt   DateTime      @updatedAt
+
+  buyer       User          @relation("BuyerInquiries", fields: [buyerId], references: [id])
+  seller      Seller        @relation("SellerInquiries", fields: [sellerId], references: [id])
+  product     Product       @relation(fields: [productId], references: [id])
+
+  @@index([buyerId])
+  @@index([sellerId])
+  @@index([status])
+}
+
+// ============================================================
+// NOTIFICATIONS
+// ============================================================
+
+enum NotificationType {
+  ORDER_PLACED
+  ORDER_CONFIRMED
+  ORDER_SHIPPED
+  ORDER_DELIVERED
+  ORDER_CANCELLED
+  INQUIRY_RECEIVED
+  INQUIRY_RESPONDED
+  PAYMENT_RECEIVED
+  PRODUCT_LOW_STOCK
+  PRODUCT_EXPIRING
+  SYSTEM
+}
+
+model Notification {
+  id        String           @id @default(cuid())
+  userId    String
+  orderId   String?
+  type      NotificationType
+  title     String
+  body      String
+  data      Json?
+  isRead    Boolean          @default(false)
+  sentViaPush Boolean        @default(false)
+  
+  createdAt DateTime         @default(now())
+
+  user      User             @relation(fields: [userId], references: [id])
+  order     Order?           @relation(fields: [orderId], references: [id])
+
+  @@index([userId, isRead])
+  @@index([createdAt])
+}
+
+// ============================================================
+// REVIEWS
+// ============================================================
+
+model Review {
+  id        String   @id @default(cuid())
+  userId    String
+  sellerId  String
+  rating    Int      // 1-5
+  comment   String?
+  
+  createdAt DateTime @default(now())
+
+  user      User     @relation(fields: [userId], references: [id])
+  seller    Seller   @relation(fields: [sellerId], references: [id])
+
+  @@unique([userId, sellerId])
+  @@index([sellerId])
+}
