@@ -505,6 +505,65 @@ export default function SellerDashboardPage() {
     );
   }
 
+  // Show pending approval screen for unverified sellers
+  if (user.seller && !user.seller.isVerified) {
+    return (
+      <div style={{ paddingBottom: 80 }}>
+        <div style={{
+          background: 'linear-gradient(135deg, #0A8F3C 0%, #067A32 100%)',
+          color: '#fff',
+          padding: '20px 20px 16px',
+        }}>
+          <h1 style={{ fontSize: 20, fontWeight: 700, margin: 0 }}>Seller Dashboard</h1>
+          <p style={{ fontSize: 13, opacity: 0.8, margin: 0 }}>
+            {user.seller.businessName || 'Your Store'}
+          </p>
+        </div>
+        <div style={{ padding: '40px 20px', textAlign: 'center' }}>
+          <div style={{
+            width: 80, height: 80, borderRadius: '50%',
+            background: '#FEF3C7', display: 'flex', alignItems: 'center',
+            justifyContent: 'center', margin: '0 auto 20px',
+          }}>
+            <svg width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="#D97706" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+              <circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/>
+            </svg>
+          </div>
+          <h2 style={{ fontSize: 20, fontWeight: 700, color: '#111', margin: '0 0 8px' }}>
+            Account Pending Approval
+          </h2>
+          <p style={{ fontSize: 14, color: '#666', lineHeight: 1.6, maxWidth: 400, margin: '0 auto 24px' }}>
+            Your seller account is currently under review. Our team will verify your business details and approve your account shortly. You will be notified once your account is approved.
+          </p>
+          <div style={{
+            background: '#F0FDF4', border: '1px solid #BBF7D0', borderRadius: 12,
+            padding: 16, maxWidth: 360, margin: '0 auto 24px', textAlign: 'left',
+          }}>
+            <h3 style={{ fontSize: 14, fontWeight: 600, color: '#166534', margin: '0 0 8px' }}>
+              What happens next?
+            </h3>
+            <ul style={{ fontSize: 13, color: '#15803D', margin: 0, paddingLeft: 18, lineHeight: 1.8 }}>
+              <li>Our team reviews your business information</li>
+              <li>We verify your NAFDAC license and CAC registration</li>
+              <li>You'll receive a notification once approved</li>
+              <li>Once approved, you can list products and receive orders</li>
+            </ul>
+          </div>
+          <button
+            onClick={() => navigate('/')}
+            style={{
+              padding: '12px 24px', borderRadius: 8, border: '1px solid #D1D5DB',
+              background: '#fff', color: '#374151', fontSize: 14, fontWeight: 600,
+              cursor: 'pointer', fontFamily: "'DM Sans', sans-serif",
+            }}
+          >
+            Back to Marketplace
+          </button>
+        </div>
+      </div>
+    );
+  }
+
   return (
     <div style={{ paddingBottom: 80 }}>
       {/* Header */}

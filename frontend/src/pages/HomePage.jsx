@@ -4,7 +4,8 @@ import { productApi } from '../services/api';
 import { useAuth } from '../context/AuthContext';
 import { Icons, formatNaira } from '../components/shared/Icons';
 
-const CATEGORIES = ['All', 'Oncology', 'Rare Disease', 'Orphan Drugs', 'Anti-infective', 'Blood Products', 'Vaccines', 'Diagnostics', 'Laboratories'];
+const CATEGORIES = ['All', 'Oncology', 'Rare Disease', 'Orphan Drugs', 'Anti-infective', 'Blood Products', 'Vaccines', 'Diagnostics'];
+const DIAGNOSTICS_SUB = ['Diagnostics', 'Laboratories'];
 const BLOOD_TYPES = ['A+', 'A-', 'B+', 'B-', 'AB+', 'AB-', 'O+', 'O-'];
 
 const QUICK_ACTIONS = [
@@ -114,7 +115,7 @@ export default function HomePage() {
 
   // Sync URL category param → local state
   useEffect(() => {
-    if (urlCategory && CATEGORIES.includes(urlCategory)) {
+    if (urlCategory && [...CATEGORIES, ...DIAGNOSTICS_SUB].includes(urlCategory)) {
       setCategory(urlCategory);
     } else if (!urlCategory && !query) {
       setCategory('All');
@@ -199,13 +200,35 @@ export default function HomePage() {
       {/* Category Chips */}
       <div className="category-strip">
         {CATEGORIES.map((cat) => (
-          <button
-            key={cat}
-            className={`category-chip ${category === cat ? 'active' : ''}`}
-            onClick={() => handleCategoryChange(cat)}
-          >
-            {cat}
-          </button>
+          cat === 'Diagnostics' ? (
+            <div key={cat} className="category-chip-dropdown">
+              <button
+                className={`category-chip ${DIAGNOSTICS_SUB.includes(category) ? 'active' : ''}`}
+                onClick={() => handleCategoryChange('Diagnostics')}
+              >
+                Diagnostics <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" style={{ marginLeft: 2 }}><polyline points="6 9 12 15 18 9"/></svg>
+              </button>
+              <div className="category-chip-dropdown-menu">
+                {DIAGNOSTICS_SUB.map((sub) => (
+                  <button
+                    key={sub}
+                    className={`category-chip-dropdown-item ${category === sub ? 'active' : ''}`}
+                    onClick={() => handleCategoryChange(sub)}
+                  >
+                    {sub}
+                  </button>
+                ))}
+              </div>
+            </div>
+          ) : (
+            <button
+              key={cat}
+              className={`category-chip ${category === cat ? 'active' : ''}`}
+              onClick={() => handleCategoryChange(cat)}
+            >
+              {cat}
+            </button>
+          )
         ))}
       </div>
 

@@ -306,9 +306,8 @@ img { max-width: 100%; display: block; }
   background: #232f3e;
   max-width: 1500px;
   margin: 0 auto;
-  overflow-x: auto;
-  scrollbar-width: none;
-  -ms-overflow-style: none;
+  overflow: visible;
+  flex-wrap: wrap;
 }
 
 .amz-subnav::-webkit-scrollbar {
@@ -351,6 +350,43 @@ img { max-width: 100%; display: block; }
 
 .amz-subnav-link:hover {
   border-color: #fff;
+}
+
+.amz-subnav-dropdown {
+  position: relative;
+  display: inline-flex;
+}
+.amz-subnav-dropdown .amz-subnav-link {
+  display: flex;
+  align-items: center;
+}
+.amz-subnav-dropdown-menu {
+  display: none;
+  position: absolute;
+  top: 100%;
+  left: 0;
+  background: #232f3e;
+  border: 1px solid #3a4553;
+  border-radius: 4px;
+  min-width: 160px;
+  z-index: 100;
+  padding: 4px 0;
+  box-shadow: 0 4px 12px rgba(0,0,0,0.3);
+}
+.amz-subnav-dropdown:hover .amz-subnav-dropdown-menu {
+  display: block;
+}
+.amz-subnav-dropdown-item {
+  display: block;
+  padding: 8px 16px;
+  color: #ddd;
+  font-size: 13px;
+  text-decoration: none;
+  white-space: nowrap;
+}
+.amz-subnav-dropdown-item:hover {
+  background: #37475a;
+  color: #fff;
 }
 
 .amz-subnav-highlight {
@@ -1078,12 +1114,9 @@ img { max-width: 100%; display: block; }
   display: flex;
   gap: 8px;
   padding: 14px 0;
-  overflow-x: auto;
-  scrollbar-width: none;
-  -ms-overflow-style: none;
+  overflow: visible;
+  flex-wrap: wrap;
 }
-
-.category-strip::-webkit-scrollbar { display: none; }
 
 .category-chip {
   flex-shrink: 0;
@@ -1108,6 +1141,50 @@ img { max-width: 100%; display: block; }
   background: #131921;
   color: #fff;
   border-color: #131921;
+}
+
+.category-chip-dropdown {
+  position: relative;
+  flex-shrink: 0;
+}
+.category-chip-dropdown .category-chip {
+  display: flex;
+  align-items: center;
+}
+.category-chip-dropdown-menu {
+  display: none;
+  position: absolute;
+  top: calc(100% + 4px);
+  left: 0;
+  background: #fff;
+  border: 1px solid var(--gray-200);
+  border-radius: 8px;
+  min-width: 150px;
+  z-index: 100;
+  padding: 4px 0;
+  box-shadow: 0 4px 12px rgba(0,0,0,0.12);
+}
+.category-chip-dropdown:hover .category-chip-dropdown-menu {
+  display: block;
+}
+.category-chip-dropdown-item {
+  display: block;
+  width: 100%;
+  padding: 10px 16px;
+  border: none;
+  background: none;
+  font-size: 13px;
+  font-family: inherit;
+  color: var(--gray-700);
+  cursor: pointer;
+  text-align: left;
+}
+.category-chip-dropdown-item:hover {
+  background: var(--gray-100);
+}
+.category-chip-dropdown-item.active {
+  font-weight: 700;
+  color: #131921;
 }
 
 .blood-type-strip {

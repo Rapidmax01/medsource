@@ -13,7 +13,6 @@ const CATEGORIES = [
   'Blood Products',
   'Vaccines',
   'Diagnostics',
-  'Laboratories',
 ];
 
 function SearchBar() {
@@ -104,13 +103,28 @@ export default function Layout() {
             All
           </button>
           {CATEGORIES.slice(1).map((cat) => (
-            <Link
-              key={cat}
-              to={`/?category=${encodeURIComponent(cat)}`}
-              className="amz-subnav-link"
-            >
-              {cat}
-            </Link>
+            cat === 'Diagnostics' ? (
+              <div key={cat} className="amz-subnav-dropdown">
+                <Link
+                  to={`/?category=${encodeURIComponent(cat)}`}
+                  className="amz-subnav-link"
+                >
+                  {cat} <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" style={{ marginLeft: 2 }}><polyline points="6 9 12 15 18 9"/></svg>
+                </Link>
+                <div className="amz-subnav-dropdown-menu">
+                  <Link to="/?category=Diagnostics" className="amz-subnav-dropdown-item">All Diagnostics</Link>
+                  <Link to="/?category=Laboratories" className="amz-subnav-dropdown-item">Laboratories</Link>
+                </div>
+              </div>
+            ) : (
+              <Link
+                key={cat}
+                to={`/?category=${encodeURIComponent(cat)}`}
+                className="amz-subnav-link"
+              >
+                {cat}
+              </Link>
+            )
           ))}
           {!user && (
             <Link to="/register/email" className="amz-subnav-link amz-subnav-highlight">
