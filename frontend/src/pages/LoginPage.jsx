@@ -5,6 +5,7 @@ import { authApi } from '../services/api';
 import { useAuth } from '../context/AuthContext';
 import { useToast } from '../context/ToastContext';
 import { Icons } from '../components/shared/Icons';
+import PasswordInput from '../components/shared/PasswordInput';
 
 const COUNTRY_CODES = [
   { code: '+234', country: 'NG', flag: '\u{1F1F3}\u{1F1EC}', label: 'Nigeria' },
@@ -216,10 +217,8 @@ export default function LoginPage() {
             </div>
             <div className="form-group">
               <label className="form-label" htmlFor="password">Password</label>
-              <input
+              <PasswordInput
                 id="password"
-                type="password"
-                className="form-input"
                 placeholder="Enter your password"
                 value={password}
                 onChange={(e) => setPassword(e.target.value)}
@@ -233,11 +232,16 @@ export default function LoginPage() {
             >
               {submitting ? 'Signing In...' : 'Sign In'}
             </button>
+            <div style={{ textAlign: 'right', marginTop: '8px' }}>
+              <Link to="/forgot-password" style={{ color: '#0A8F3C', fontSize: '13px', fontWeight: 500 }}>
+                Forgot password?
+              </Link>
+            </div>
             <p style={{
               textAlign: 'center',
               color: '#666',
               fontSize: '14px',
-              marginTop: '16px',
+              marginTop: '12px',
             }}>
               Don't have an account?{' '}
               <Link to="/register/email" style={{ color: '#0A8F3C', fontWeight: 600 }}>
@@ -253,7 +257,7 @@ export default function LoginPage() {
         </div>
 
         {/* Google sign-in */}
-        <div style={{ padding: '0 24px 32px' }}>
+        <div style={{ padding: '0 24px 16px' }}>
           <button
             type="button"
             className="google-btn"
@@ -268,6 +272,36 @@ export default function LoginPage() {
             </svg>
             <span>Continue with Google</span>
           </button>
+
+          {/* Create new account */}
+          <div style={{
+            borderTop: '1px solid #e7e9ec',
+            paddingTop: '16px',
+            marginTop: '16px',
+            textAlign: 'center',
+          }}>
+            <p style={{ color: '#666', fontSize: '14px', margin: '0 0 12px' }}>
+              New to MedSource?
+            </p>
+            <Link
+              to="/register/email"
+              className="btn-full"
+              style={{
+                display: 'block',
+                padding: '12px',
+                border: '1px solid #ccc',
+                borderRadius: '8px',
+                background: '#f7f8fa',
+                color: '#131921',
+                fontWeight: 600,
+                fontSize: '15px',
+                textDecoration: 'none',
+                textAlign: 'center',
+              }}
+            >
+              Create new account
+            </Link>
+          </div>
         </div>
       </div>
     </div>

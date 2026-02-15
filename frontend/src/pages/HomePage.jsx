@@ -4,7 +4,7 @@ import { productApi } from '../services/api';
 import { useAuth } from '../context/AuthContext';
 import { Icons, formatNaira } from '../components/shared/Icons';
 
-const CATEGORIES = ['All', 'Oncology', 'Rare Disease', 'Anti-infective', 'Blood Products', 'Vaccines', 'Diagnostics'];
+const CATEGORIES = ['All', 'Oncology', 'Rare Disease', 'Orphan Drugs', 'Anti-infective', 'Blood Products', 'Vaccines', 'Diagnostics', 'Laboratories'];
 const BLOOD_TYPES = ['A+', 'A-', 'B+', 'B-', 'AB+', 'AB-', 'O+', 'O-'];
 
 const QUICK_ACTIONS = [

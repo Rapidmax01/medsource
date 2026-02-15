@@ -8,10 +8,12 @@ const CATEGORIES = [
   'All',
   'Oncology',
   'Rare Disease',
+  'Orphan Drugs',
   'Anti-infective',
   'Blood Products',
   'Vaccines',
   'Diagnostics',
+  'Laboratories',
 ];
 
 function SearchBar() {

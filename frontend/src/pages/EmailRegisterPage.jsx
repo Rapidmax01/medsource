@@ -3,6 +3,7 @@ import { useNavigate, Link } from 'react-router-dom';
 import { authApi } from '../services/api';
 import { useToast } from '../context/ToastContext';
 import { Icons } from '../components/shared/Icons';
+import PasswordInput from '../components/shared/PasswordInput';
 
 const ACCOUNT_TYPES = [
   { value: 'INDIVIDUAL', label: 'Individual' },
@@ -135,11 +136,9 @@ export default function EmailRegisterPage() {
           <div className="form-row">
             <div className="form-group">
               <label className="form-label" htmlFor="password">Password</label>
-              <input
+              <PasswordInput
                 id="password"
                 name="password"
-                type="password"
-                className="form-input"
                 placeholder="Min. 6 characters"
                 value={form.password}
                 onChange={handleChange}
@@ -148,11 +147,9 @@ export default function EmailRegisterPage() {
             </div>
             <div className="form-group">
               <label className="form-label" htmlFor="confirmPassword">Confirm Password</label>
-              <input
+              <PasswordInput
                 id="confirmPassword"
                 name="confirmPassword"
-                type="password"
-                className="form-input"
                 placeholder="Confirm password"
                 value={form.confirmPassword}
                 onChange={handleChange}

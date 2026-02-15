@@ -12,6 +12,7 @@ import VerifyPage from './pages/VerifyPage';
 import RegisterPage from './pages/RegisterPage';
 import EmailRegisterPage from './pages/EmailRegisterPage';
 import EmailVerifyPage from './pages/EmailVerifyPage';
+import ForgotPasswordPage from './pages/ForgotPasswordPage';
 import SellerDashboardPage from './pages/SellerDashboardPage';
 import SellerOnboardingPage from './pages/SellerOnboardingPage';
 import AdminPage from './pages/AdminPage';
@@ -49,6 +50,7 @@ export default function App() {
       <Route path="/register" element={<GuestRoute><RegisterPage /></GuestRoute>} />
       <Route path="/register/email" element={<GuestRoute><EmailRegisterPage /></GuestRoute>} />
       <Route path="/verify/email" element={<GuestRoute><EmailVerifyPage /></GuestRoute>} />
+      <Route path="/forgot-password" element={<GuestRoute><ForgotPasswordPage /></GuestRoute>} />
 
       {/* Main app routes with bottom nav */}
       <Route element={<Layout />}>

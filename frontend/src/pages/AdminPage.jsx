@@ -4,6 +4,7 @@ import { useAuth } from '../context/AuthContext';
 import { useToast } from '../context/ToastContext';
 import { Icons, formatNaira } from '../components/shared/Icons';
 import { adminApi } from '../services/api';
+import PasswordInput from '../components/shared/PasswordInput';
 
 function StatusBadge({ status, small }) {
   const colors = {
@@ -190,7 +191,7 @@ function UsersTab() {
   const [totalPages, setTotalPages] = useState(1);
   const [subAdmins, setSubAdmins] = useState([]);
   const [showCreateForm, setShowCreateForm] = useState(false);
-  const [newAdmin, setNewAdmin] = useState({ phone: '', firstName: '', lastName: '', email: '' });
+  const [newAdmin, setNewAdmin] = useState({ email: '', password: '', firstName: '', lastName: '', phone: '' });
   const { showToast } = useToast();
 
   const fetchUsers = (p = 1, q = '') => {
@@ -251,14 +252,18 @@ function UsersTab() {
 
   const handleCreateSubAdmin = async (e) => {
     e.preventDefault();
-    if (!newAdmin.phone || !newAdmin.firstName || !newAdmin.lastName) {
-      showToast('Phone, first name, and last name are required', 'error');
+    if (!newAdmin.email || !newAdmin.password || !newAdmin.firstName || !newAdmin.lastName) {
+      showToast('Email, password, first name, and last name are required', 'error');
+      return;
+    }
+    if (newAdmin.password.length < 6) {
+      showToast('Password must be at least 6 characters', 'error');
       return;
     }
     try {
       await adminApi.createSubAdmin(newAdmin);
       showToast('Sub-admin created');
-      setNewAdmin({ phone: '', firstName: '', lastName: '', email: '' });
+      setNewAdmin({ email: '', password: '', firstName: '', lastName: '', phone: '' });
       setShowCreateForm(false);
       fetchSubAdmins();
     } catch (err) {
@@ -333,15 +338,49 @@ function UsersTab() {
               />
               <input
                 style={inputStyle}
-                placeholder="Phone (+234...) *"
-                value={newAdmin.phone}
-                onChange={(e) => setNewAdmin((p) => ({ ...p, phone: e.target.value }))}
-              />
-              <input
-                style={inputStyle}
-                placeholder="Email (optional)"
+                placeholder="Email *"
+                type="email"
                 value={newAdmin.email}
                 onChange={(e) => setNewAdmin((p) => ({ ...p, email: e.target.value }))}
+              />
+              <div style={{ display: 'flex', gap: 6 }}>
+                <PasswordInput
+                  className=""
+                  style={{ ...inputStyle, flex: 1, paddingRight: 44 }}
+                  placeholder="Password *"
+                  value={newAdmin.password}
+                  onChange={(e) => setNewAdmin((p) => ({ ...p, password: e.target.value }))}
+                />
+                <button
+                  type="button"
+                  onClick={() => {
+                    const chars = 'ABCDEFGHJKMNPQRSTUVWXYZabcdefghjkmnpqrstuvwxyz23456789!@#$';
+                    let pwd = '';
+                    for (let i = 0; i < 10; i++) pwd += chars[Math.floor(Math.random() * chars.length)];
+                    setNewAdmin((p) => ({ ...p, password: pwd }));
+                    showToast('Temp password generated — copy it before creating');
+                  }}
+                  style={{
+                    padding: '8px 12px',
+                    borderRadius: 'var(--radius-sm)',
+                    border: '1.5px solid var(--gray-200)',
+                    background: '#f7f8fa',
+                    color: 'var(--gray-700)',
+                    fontSize: 11,
+                    fontWeight: 600,
+                    cursor: 'pointer',
+                    fontFamily: "'DM Sans', sans-serif",
+                    whiteSpace: 'nowrap',
+                  }}
+                >
+                  Generate
+                </button>
+              </div>
+              <input
+                style={{ ...inputStyle, gridColumn: '1 / -1' }}
+                placeholder="Phone (optional)"
+                value={newAdmin.phone}
+                onChange={(e) => setNewAdmin((p) => ({ ...p, phone: e.target.value }))}
               />
             </div>
             <button type="submit" style={{ ...btnStyle('primary'), flex: 'none', width: '100%' }}>

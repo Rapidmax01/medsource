@@ -571,6 +571,138 @@ router.post('/google', async (req, res, next) => {
   }
 });
 
+
+/**
+ * POST /api/auth/email/forgot-password
+ * Send password reset code to email
+ */
+router.post('/email/forgot-password', async (req, res, next) => {
+  try {
+    const { email } = req.body;
+
+    if (!email) {
+      return res.status(400).json({ error: 'Email is required' });
+    }
+
+    const user = await prisma.user.findUnique({ where: { email } });
+    if (!user || !user.passwordHash) {
+      // Don't reveal if email exists
+      return res.json({ success: true, message: 'If an account with this email exists, a reset code has been sent' });
+    }
+
+    const code = otpService.generateCode(6);
+
+    // Invalidate previous reset OTPs
+    await prisma.otpCode.updateMany({
+      where: { phone: email, purpose: 'password_reset', used: false },
+      data: { used: true },
+    });
+
+    await prisma.otpCode.create({
+      data: {
+        phone: email,
+        code,
+        purpose: 'password_reset',
+        userId: user.id,
+        expiresAt: new Date(Date.now() + 10 * 60 * 1000),
+      },
+    });
+
+    await emailService.sendVerificationCode(email, code);
+
+    res.json({ success: true, message: 'If an account with this email exists, a reset code has been sent' });
+  } catch (error) {
+    next(error);
+  }
+});
+
+/**
+ * POST /api/auth/email/reset-password
+ * Verify reset code and set new password
+ */
+router.post('/email/reset-password', async (req, res, next) => {
+  try {
+    const { email, code, newPassword } = req.body;
+
+    if (!email || !code || !newPassword) {
+      return res.status(400).json({ error: 'Email, code, and new password are required' });
+    }
+
+    if (newPassword.length < 6) {
+      return res.status(400).json({ error: 'Password must be at least 6 characters' });
+    }
+
+    const otpRecord = await prisma.otpCode.findFirst({
+      where: {
+        phone: email,
+        code,
+        purpose: 'password_reset',
+        used: false,
+        expiresAt: { gt: new Date() },
+      },
+      orderBy: { createdAt: 'desc' },
+    });
+
+    if (!otpRecord) {
+      return res.status(400).json({ error: 'Invalid or expired reset code' });
+    }
+
+    // Mark OTP as used
+    await prisma.otpCode.update({
+      where: { id: otpRecord.id },
+      data: { used: true },
+    });
+
+    const passwordHash = await bcrypt.hash(newPassword, 10);
+
+    await prisma.user.update({
+      where: { email },
+      data: { passwordHash },
+    });
+
+    res.json({ success: true, message: 'Password reset successfully' });
+  } catch (error) {
+    next(error);
+  }
+});
+
+/**
+ * PUT /api/auth/change-password
+ * Change password for logged-in user
+ */
+router.put('/change-password', authenticate, async (req, res, next) => {
+  try {
+    const { currentPassword, newPassword } = req.body;
+
+    if (!newPassword || newPassword.length < 6) {
+      return res.status(400).json({ error: 'New password must be at least 6 characters' });
+    }
+
+    const user = await prisma.user.findUnique({ where: { id: req.user.id } });
+
+    // If user has an existing password, verify current password
+    if (user.passwordHash) {
+      if (!currentPassword) {
+        return res.status(400).json({ error: 'Current password is required' });
+      }
+      const valid = await bcrypt.compare(currentPassword, user.passwordHash);
+      if (!valid) {
+        return res.status(401).json({ error: 'Current password is incorrect' });
+      }
+    }
+
+    const passwordHash = await bcrypt.hash(newPassword, 10);
+    await prisma.user.update({
+      where: { id: req.user.id },
+      data: { passwordHash },
+    });
+
+    res.json({ success: true, message: 'Password updated successfully' });
+  } catch (error) {
+    next(error);
+  }
+});
+
 // Helper: Remove sensitive fields from user object
 function sanitizeUser(user) {
   if (!user) return null;

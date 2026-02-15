@@ -1,6 +1,8 @@
 const express = require('express');
+const bcrypt = require('bcryptjs');
 const prisma = require('../models');
 const { authenticate, requireAdmin, requireSuperAdmin } = require('../middleware/auth');
+const emailService = require('../services/email');
 
 const router = express.Router();
 
@@ -63,6 +65,10 @@ router.get('/users', async (req, res, next) => {
     const skip = (Number(page) - 1) * Number(limit);
 
     const where = {};
+    // Sub-admins cannot see super admins
+    if (req.user.role !== 'SUPER_ADMIN') {
+      where.role = { not: 'SUPER_ADMIN' };
+    }
     if (role) where.role = role;
     if (isActive !== undefined) where.isActive = isActive === 'true';
     if (search) {
@@ -165,30 +171,37 @@ router.put('/users/:id/suspend', requireSuperAdmin, async (req, res, next) => {
  */
 router.post('/sub-admins', requireSuperAdmin, async (req, res, next) => {
   try {
-    const { phone, email, firstName, lastName, state, city } = req.body;
+    const { phone, email, password, firstName, lastName, state, city } = req.body;
 
-    if (!phone || !firstName || !lastName) {
-      return res.status(400).json({ error: 'Phone, firstName, and lastName are required' });
+    if (!email || !password || !firstName || !lastName) {
+      return res.status(400).json({ error: 'Email, password, first name, and last name are required' });
     }
 
-    // Check if phone already exists
-    const existing = await prisma.user.findUnique({ where: { phone } });
-    if (existing) {
-      return res.status(409).json({ error: 'A user with this phone number already exists' });
+    if (password.length < 6) {
+      return res.status(400).json({ error: 'Password must be at least 6 characters' });
     }
 
-    // Check email uniqueness if provided
-    if (email) {
-      const existingEmail = await prisma.user.findUnique({ where: { email } });
-      if (existingEmail) {
-        return res.status(409).json({ error: 'A user with this email already exists' });
+    // Check email uniqueness
+    const existingEmail = await prisma.user.findUnique({ where: { email } });
+    if (existingEmail) {
+      return res.status(409).json({ error: 'A user with this email already exists' });
+    }
+
+    // Check phone uniqueness if provided
+    if (phone) {
+      const existing = await prisma.user.findUnique({ where: { phone } });
+      if (existing) {
+        return res.status(409).json({ error: 'A user with this phone number already exists' });
       }
     }
 
+    const passwordHash = await bcrypt.hash(password, 10);
+
     const subAdmin = await prisma.user.create({
       data: {
-        phone,
-        email: email || null,
+        phone: phone || null,
+        email,
+        passwordHash,
         firstName,
         lastName,
         role: 'SUB_ADMIN',
@@ -208,6 +221,13 @@ router.post('/sub-admins', requireSuperAdmin, async (req, res, next) => {
         createdAt: true,
       },
     });
+
+    // Send welcome email with credentials
+    try {
+      await emailService.sendSubAdminWelcome(email, firstName, password);
+    } catch (emailErr) {
+      console.error('Failed to send sub-admin welcome email:', emailErr);
+    }
 
     res.status(201).json({ success: true, subAdmin });
   } catch (error) {

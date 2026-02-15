@@ -40,9 +40,12 @@ export const authApi = {
   emailRegister: (data) => api.post('/auth/email/register', data),
   emailVerify: (tempToken, code) => api.post('/auth/email/verify', { tempToken, code }),
   emailResend: (tempToken) => api.post('/auth/email/resend', { tempToken }),
+  forgotPassword: (email) => api.post('/auth/email/forgot-password', { email }),
+  resetPassword: (email, code, newPassword) => api.post('/auth/email/reset-password', { email, code, newPassword }),
   googleLogin: (accessToken) => api.post('/auth/google', { accessToken }),
   getMe: () => api.get('/auth/me'),
   updateProfile: (data) => api.put('/auth/profile', data),
+  changePassword: (currentPassword, newPassword) => api.put('/auth/change-password', { currentPassword, newPassword }),
   updateFcmToken: (fcmToken) => api.put('/auth/fcm-token', { fcmToken }),
 };
 
