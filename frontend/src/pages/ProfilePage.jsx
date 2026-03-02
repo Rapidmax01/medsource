@@ -6,6 +6,48 @@ import { authApi } from '../services/api';
 import { Icons } from '../components/shared/Icons';
 import PasswordInput from '../components/shared/PasswordInput';
 
+const NIGERIAN_STATES_CITIES = {
+  'Abia': ['Aba', 'Umuahia', 'Ohafia', 'Arochukwu'],
+  'Abuja (FCT)': ['Garki', 'Wuse', 'Maitama', 'Asokoro', 'Gwarinpa', 'Kubwa', 'Bwari', 'Kuje', 'Lugbe'],
+  'Adamawa': ['Yola', 'Jimeta', 'Mubi', 'Numan', 'Ganye'],
+  'Akwa Ibom': ['Uyo', 'Eket', 'Ikot Ekpene', 'Oron', 'Abak'],
+  'Anambra': ['Awka', 'Onitsha', 'Nnewi', 'Ekwulobia', 'Ogidi'],
+  'Bauchi': ['Bauchi', 'Azare', 'Misau', 'Jama\'are'],
+  'Bayelsa': ['Yenagoa', 'Brass', 'Ogbia', 'Sagbama'],
+  'Benue': ['Makurdi', 'Gboko', 'Otukpo', 'Katsina-Ala'],
+  'Borno': ['Maiduguri', 'Biu', 'Damboa', 'Gwoza'],
+  'Cross River': ['Calabar', 'Ikom', 'Ogoja', 'Obudu'],
+  'Delta': ['Asaba', 'Warri', 'Sapele', 'Ughelli', 'Agbor', 'Effurun'],
+  'Ebonyi': ['Abakaliki', 'Afikpo', 'Onueke'],
+  'Edo': ['Benin City', 'Auchi', 'Ekpoma', 'Uromi', 'Irrua'],
+  'Ekiti': ['Ado-Ekiti', 'Ikere-Ekiti', 'Oye-Ekiti', 'Ijero-Ekiti'],
+  'Enugu': ['Enugu', 'Nsukka', 'Agbani', 'Oji River'],
+  'Gombe': ['Gombe', 'Billiri', 'Kaltungo', 'Bajoga'],
+  'Imo': ['Owerri', 'Orlu', 'Okigwe', 'Oguta'],
+  'Jigawa': ['Dutse', 'Hadejia', 'Gumel', 'Kazaure'],
+  'Kaduna': ['Kaduna', 'Zaria', 'Kafanchan', 'Kagoro'],
+  'Kano': ['Kano', 'Wudil', 'Gwarzo', 'Rano', 'Bichi'],
+  'Katsina': ['Katsina', 'Daura', 'Funtua', 'Malumfashi'],
+  'Kebbi': ['Birnin Kebbi', 'Argungu', 'Yauri', 'Zuru'],
+  'Kogi': ['Lokoja', 'Okene', 'Idah', 'Kabba', 'Ankpa'],
+  'Kwara': ['Ilorin', 'Offa', 'Jebba', 'Lafiagi'],
+  'Lagos': ['Ikeja', 'Victoria Island', 'Lekki', 'Surulere', 'Yaba', 'Ikoyi', 'Ajah', 'Ikorodu', 'Epe', 'Badagry', 'Oshodi', 'Mushin', 'Agege', 'Apapa', 'Festac', 'Ojota', 'Maryland'],
+  'Nasarawa': ['Lafia', 'Keffi', 'Akwanga', 'Nasarawa'],
+  'Niger': ['Minna', 'Bida', 'Suleja', 'Kontagora'],
+  'Ogun': ['Abeokuta', 'Sagamu', 'Ijebu-Ode', 'Ota', 'Ilaro'],
+  'Ondo': ['Akure', 'Ondo', 'Owo', 'Ikare'],
+  'Osun': ['Osogbo', 'Ile-Ife', 'Ilesa', 'Ede', 'Iwo'],
+  'Oyo': ['Ibadan', 'Ogbomoso', 'Oyo', 'Iseyin', 'Saki'],
+  'Plateau': ['Jos', 'Bukuru', 'Pankshin', 'Shendam'],
+  'Rivers': ['Port Harcourt', 'Obio-Akpor', 'Bonny', 'Degema', 'Eleme'],
+  'Sokoto': ['Sokoto', 'Tambuwal', 'Bodinga', 'Gwadabawa'],
+  'Taraba': ['Jalingo', 'Wukari', 'Bali', 'Takum'],
+  'Yobe': ['Damaturu', 'Potiskum', 'Nguru', 'Gashua'],
+  'Zamfara': ['Gusau', 'Kaura Namoda', 'Talata Mafara', 'Anka'],
+};
+
+const NIGERIAN_STATES = Object.keys(NIGERIAN_STATES_CITIES).sort();
+
 export default function ProfilePage() {
   const navigate = useNavigate();
   const { user, isSeller, isAdmin, logout, updateUser } = useAuth();
@@ -213,25 +255,34 @@ export default function ProfilePage() {
                 onChange={(e) => setEditData((p) => ({ ...p, phone: e.target.value }))}
               />
             </div>
-            <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 10, marginBottom: 16 }}>
-              <div>
-                <label style={{ fontSize: 12, fontWeight: 600, color: 'var(--gray-500)', display: 'block', marginBottom: 4 }}>State</label>
-                <input
-                  className="form-input"
-                  placeholder="e.g. Lagos"
-                  value={editData.state || ''}
-                  onChange={(e) => setEditData((p) => ({ ...p, state: e.target.value }))}
-                />
-              </div>
-              <div>
-                <label style={{ fontSize: 12, fontWeight: 600, color: 'var(--gray-500)', display: 'block', marginBottom: 4 }}>City</label>
-                <input
-                  className="form-input"
-                  placeholder="e.g. Ikeja"
-                  value={editData.city || ''}
-                  onChange={(e) => setEditData((p) => ({ ...p, city: e.target.value }))}
-                />
-              </div>
+            <div style={{ marginBottom: 12 }}>
+              <label style={{ fontSize: 12, fontWeight: 600, color: 'var(--gray-500)', display: 'block', marginBottom: 4 }}>State</label>
+              <select
+                className="form-input"
+                value={editData.state || ''}
+                onChange={(e) => setEditData((p) => ({ ...p, state: e.target.value, city: '' }))}
+                style={{ appearance: 'auto' }}
+              >
+                <option value="">Select state</option>
+                {NIGERIAN_STATES.map((s) => (
+                  <option key={s} value={s}>{s}</option>
+                ))}
+              </select>
+            </div>
+            <div style={{ marginBottom: 16 }}>
+              <label style={{ fontSize: 12, fontWeight: 600, color: 'var(--gray-500)', display: 'block', marginBottom: 4 }}>City</label>
+              <select
+                className="form-input"
+                value={editData.city || ''}
+                onChange={(e) => setEditData((p) => ({ ...p, city: e.target.value }))}
+                style={{ appearance: 'auto' }}
+                disabled={!editData.state}
+              >
+                <option value="">{editData.state ? 'Select city' : 'Select state first'}</option>
+                {(NIGERIAN_STATES_CITIES[editData.state] || []).map((c) => (
+                  <option key={c} value={c}>{c}</option>
+                ))}
+              </select>
             </div>
             <button
               type="submit"
