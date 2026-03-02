@@ -174,12 +174,16 @@ export default function ProfilePage() {
           className="profile-menu-item"
           onClick={() => {
             if (!showEditProfile) {
+              const userState = user.state || '';
+              const userCity = user.city || '';
+              const knownCities = NIGERIAN_STATES_CITIES[userState] || [];
               setEditData({
                 firstName: user.firstName || '',
                 lastName: user.lastName || '',
                 phone: user.phone || '',
-                state: user.state || '',
-                city: user.city || '',
+                state: userState,
+                city: userCity,
+                _customCity: userCity && !knownCities.includes(userCity),
               });
             }
             setShowEditProfile(!showEditProfile);
@@ -214,7 +218,8 @@ export default function ProfilePage() {
               }
               setSavingProfile(true);
               try {
-                const res = await authApi.updateProfile(editData);
+                const { _customCity, ...profileData } = editData;
+                const res = await authApi.updateProfile(profileData);
                 updateUser(res.user || editData);
                 showToast('Profile updated!');
                 setShowEditProfile(false);
@@ -260,7 +265,7 @@ export default function ProfilePage() {
               <select
                 className="form-input"
                 value={editData.state || ''}
-                onChange={(e) => setEditData((p) => ({ ...p, state: e.target.value, city: '' }))}
+                onChange={(e) => setEditData((p) => ({ ...p, state: e.target.value, city: '', _customCity: false }))}
                 style={{ appearance: 'auto' }}
               >
                 <option value="">Select state</option>
@@ -271,18 +276,56 @@ export default function ProfilePage() {
             </div>
             <div style={{ marginBottom: 16 }}>
               <label style={{ fontSize: 12, fontWeight: 600, color: 'var(--gray-500)', display: 'block', marginBottom: 4 }}>City</label>
-              <select
-                className="form-input"
-                value={editData.city || ''}
-                onChange={(e) => setEditData((p) => ({ ...p, city: e.target.value }))}
-                style={{ appearance: 'auto' }}
-                disabled={!editData.state}
-              >
-                <option value="">{editData.state ? 'Select city' : 'Select state first'}</option>
-                {(NIGERIAN_STATES_CITIES[editData.state] || []).map((c) => (
-                  <option key={c} value={c}>{c}</option>
-                ))}
-              </select>
+              {editData._customCity ? (
+                <div style={{ display: 'flex', gap: 8 }}>
+                  <input
+                    className="form-input"
+                    placeholder="Enter your city"
+                    value={editData.city || ''}
+                    onChange={(e) => setEditData((p) => ({ ...p, city: e.target.value }))}
+                    autoFocus
+                    style={{ flex: 1 }}
+                  />
+                  <button
+                    type="button"
+                    onClick={() => setEditData((p) => ({ ...p, city: '', _customCity: false }))}
+                    style={{
+                      padding: '8px 12px',
+                      borderRadius: 'var(--radius-sm)',
+                      border: '1.5px solid var(--gray-200)',
+                      background: 'var(--gray-50)',
+                      color: 'var(--gray-600)',
+                      fontSize: 12,
+                      fontWeight: 600,
+                      cursor: 'pointer',
+                      fontFamily: "'DM Sans', sans-serif",
+                      whiteSpace: 'nowrap',
+                    }}
+                  >
+                    Back
+                  </button>
+                </div>
+              ) : (
+                <select
+                  className="form-input"
+                  value={editData.city || ''}
+                  onChange={(e) => {
+                    if (e.target.value === '__other__') {
+                      setEditData((p) => ({ ...p, city: '', _customCity: true }));
+                    } else {
+                      setEditData((p) => ({ ...p, city: e.target.value }));
+                    }
+                  }}
+                  style={{ appearance: 'auto' }}
+                  disabled={!editData.state}
+                >
+                  <option value="">{editData.state ? 'Select city' : 'Select state first'}</option>
+                  {(NIGERIAN_STATES_CITIES[editData.state] || []).map((c) => (
+                    <option key={c} value={c}>{c}</option>
+                  ))}
+                  {editData.state && <option value="__other__">Other (type your city)</option>}
+                </select>
+              )}
             </div>
             <button
               type="submit"
