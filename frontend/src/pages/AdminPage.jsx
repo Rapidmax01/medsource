@@ -140,6 +140,45 @@ function SellersTab({ isSuperAdmin }) {
                 <div style={labelStyle}>CAC Number</div>
                 <div style={valueStyle}>{seller.cacNumber || 'N/A'}</div>
               </div>
+              <div>
+                <div style={labelStyle}>NIN</div>
+                <div style={valueStyle}>{seller.nin ? `*******${seller.nin.slice(-4)}` : 'N/A'}</div>
+              </div>
+              <div>
+                <div style={labelStyle}>BVN</div>
+                <div style={{ ...valueStyle, display: 'flex', alignItems: 'center', gap: 6 }}>
+                  {seller.bvn ? `*******${seller.bvn.slice(-4)}` : 'Not provided'}
+                  {seller.bvn ? (
+                    <span style={{
+                      fontSize: 10,
+                      fontWeight: 700,
+                      padding: '2px 8px',
+                      borderRadius: 'var(--radius-full)',
+                      background: seller.bvnVerified ? '#F0FDF4' : '#FFFBEB',
+                      color: seller.bvnVerified ? '#166534' : '#92400E',
+                    }}>
+                      {seller.bvnVerified ? 'VERIFIED' : 'UNVERIFIED'}
+                    </span>
+                  ) : (
+                    <span style={{
+                      fontSize: 10,
+                      fontWeight: 700,
+                      padding: '2px 8px',
+                      borderRadius: 'var(--radius-full)',
+                      background: 'var(--gray-100)',
+                      color: 'var(--gray-400)',
+                    }}>
+                      N/A
+                    </span>
+                  )}
+                </div>
+              </div>
+              {seller.bvnFirstName && seller.bvnLastName && (
+                <div style={{ gridColumn: '1 / -1' }}>
+                  <div style={labelStyle}>BVN Name</div>
+                  <div style={valueStyle}>{seller.bvnFirstName} {seller.bvnLastName}</div>
+                </div>
+              )}
               {seller.user && (
                 <div style={{ gridColumn: '1 / -1' }}>
                   <div style={labelStyle}>Owner</div>
@@ -563,6 +602,10 @@ function AnalyticsTab() {
   }
 
   const items = [
+    { label: 'Platform Revenue', value: formatNaira(stats.platformRevenue || 0), color: 'var(--green-800)' },
+    { label: 'Total Commission (5%)', value: formatNaira(stats.totalCommission || 0), color: 'var(--green-600)' },
+    { label: 'Total Service Fees (2.5%)', value: formatNaira(stats.totalServiceFees || 0), color: 'var(--green-600)' },
+    { label: 'Seller Earnings', value: formatNaira(stats.totalSellerEarnings || 0), color: 'var(--blue-500)' },
     { label: 'Total Users', value: (stats.totalUsers || 0).toLocaleString(), color: 'var(--blue-500)' },
     { label: 'Total Sellers', value: (stats.totalSellers || 0).toLocaleString(), color: 'var(--green-600)' },
     { label: 'Pending Sellers', value: (stats.pendingSellers || 0).toLocaleString(), color: 'var(--amber-500)' },

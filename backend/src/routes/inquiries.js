@@ -1,6 +1,7 @@
 const express = require('express');
 const prisma = require('../models');
 const notificationService = require('../services/notification');
+const emailService = require('../services/email');
 const { authenticate, requireSeller } = require('../middleware/auth');
 const { validate, schemas } = require('../middleware/validate');
 
@@ -44,6 +45,12 @@ router.post('/', authenticate, validate(schemas.createInquiry), async (req, res,
     // Notify seller
     await notificationService.notifyInquiryReceived(inquiry);
 
+    // Send email to seller (fire-and-forget)
+    const sellerEmail = product.seller?.user?.email;
+    if (sellerEmail) {
+      emailService.sendInquiryNotification(sellerEmail, inquiry).catch(() => {});
+    }
+
     res.status(201).json({ inquiry });
   } catch (error) {
     next(error);
@@ -66,7 +73,7 @@ router.get('/', authenticate, async (req, res, next) => {
         where,
         include: {
           product: { select: { name: true, type: true, price: true, images: true, bloodType: true } },
-          seller: { select: { businessName: true, isVerified: true, businessPhone: true } },
+          seller: { select: { businessName: true, isVerified: true } },
         },
         orderBy: { createdAt: 'desc' },
         skip: (parseInt(page) - 1) * parseInt(limit),
@@ -132,7 +139,7 @@ router.put('/:id/respond', authenticate, requireSeller, async (req, res, next) =
 
     const inquiry = await prisma.inquiry.findFirst({
       where: { id: req.params.id, sellerId: req.user.seller.id },
-      include: { product: true, seller: true },
+      include: { product: true, seller: true, buyer: true },
     });
 
     if (!inquiry) {
@@ -154,6 +161,12 @@ router.put('/:id/respond', authenticate, requireSeller, async (req, res, next) =
 
     // Notify buyer
     await notificationService.notifyInquiryResponded(updated);
+
+    // Send email to buyer (fire-and-forget)
+    const buyerEmail = inquiry.buyer?.email;
+    if (buyerEmail) {
+      emailService.sendInquiryResponse(buyerEmail, { ...updated, response }).catch(() => {});
+    }
 
     res.json({ inquiry: updated });
   } catch (error) {

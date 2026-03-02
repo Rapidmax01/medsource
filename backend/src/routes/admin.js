@@ -28,13 +28,19 @@ router.get('/stats', async (req, res, next) => {
       prisma.product.count({ where: { isActive: true } }),
     ]);
 
-    // Calculate total revenue from paid orders
+    // Calculate revenue breakdown from paid orders
     const revenueResult = await prisma.order.aggregate({
-      _sum: { totalAmount: true },
+      _sum: { totalAmount: true, commission: true, serviceFee: true, sellerEarnings: true },
       where: { paymentStatus: 'PAID' },
     });
 
     const pendingSellers = await prisma.seller.count({ where: { isVerified: false } });
+
+    const totalRevenue = revenueResult._sum.totalAmount || 0;
+    const totalCommission = revenueResult._sum.commission || 0;
+    const totalServiceFees = revenueResult._sum.serviceFee || 0;
+    const totalSellerEarnings = revenueResult._sum.sellerEarnings || 0;
+    const platformRevenue = totalCommission + totalServiceFees;
 
     res.json({
       totalUsers,
@@ -44,7 +50,11 @@ router.get('/stats', async (req, res, next) => {
       totalOrders,
       totalProducts,
       activeProducts,
-      totalRevenue: revenueResult._sum.totalAmount || 0,
+      totalRevenue,
+      totalCommission,
+      totalServiceFees,
+      totalSellerEarnings,
+      platformRevenue,
     });
   } catch (error) {
     next(error);

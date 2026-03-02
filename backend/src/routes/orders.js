@@ -2,9 +2,11 @@ const express = require('express');
 const prisma = require('../models');
 const paymentService = require('../services/payment');
 const notificationService = require('../services/notification');
+const emailService = require('../services/email');
 const otpService = require('../services/otp');
 const { authenticate, requireSeller } = require('../middleware/auth');
 const { validate, schemas } = require('../middleware/validate');
+const { COMMISSION_RATE, SERVICE_FEE_RATE } = require('../config');
 
 const router = express.Router();
 
@@ -55,7 +57,9 @@ router.post('/', authenticate, validate(schemas.createOrder), async (req, res, n
         (sum, item) => sum + item.product.price * item.quantity,
         0
       );
-      const serviceFee = Math.round(subtotal * 0.025); // 2.5% service fee
+      const serviceFee = Math.round(subtotal * SERVICE_FEE_RATE); // 2.5% service fee
+      const commission = Math.round(subtotal * COMMISSION_RATE); // 5% platform commission
+      const sellerEarnings = subtotal - commission;
       const totalAmount = subtotal + serviceFee;
 
       // Generate order number: MSN-YYYYMMDD-XXXX
@@ -70,6 +74,9 @@ router.post('/', authenticate, validate(schemas.createOrder), async (req, res, n
           sellerId,
           subtotal,
           serviceFee,
+          commission,
+          commissionRate: COMMISSION_RATE,
+          sellerEarnings,
           totalAmount,
           deliveryAddress,
           deliveryState,
@@ -114,6 +121,12 @@ router.post('/', authenticate, validate(schemas.createOrder), async (req, res, n
 
       // Send notifications
       await notificationService.notifyOrderPlaced(order);
+
+      // Send order confirmation email (fire-and-forget)
+      const buyerEmail = req.user.email;
+      if (buyerEmail) {
+        emailService.sendOrderConfirmation(buyerEmail, order).catch(() => {});
+      }
 
       orders.push(order);
     }
@@ -194,8 +207,8 @@ router.get('/:id', authenticate, async (req, res, next) => {
         items: { include: { product: true } },
         seller: {
           select: {
-            businessName: true, isVerified: true, businessPhone: true,
-            whatsapp: true, state: true, city: true, address: true,
+            businessName: true, isVerified: true,
+            state: true, city: true,
           },
         },
         buyer: { select: { firstName: true, lastName: true, phone: true } },
@@ -264,6 +277,17 @@ router.put('/:id/status', authenticate, requireSeller, async (req, res, next) =>
           },
         });
       }
+      // Reverse seller earnings if order was already paid
+      if (order.paymentStatus === 'PAID' && order.sellerEarnings) {
+        await prisma.seller.update({
+          where: { id: order.sellerId },
+          data: {
+            totalEarnings: { decrement: order.sellerEarnings },
+            totalCommissionPaid: { decrement: order.commission || 0 },
+            pendingBalance: { decrement: order.sellerEarnings },
+          },
+        });
+      }
     }
 
     const updated = await prisma.order.update({
@@ -286,6 +310,12 @@ router.put('/:id/status', authenticate, requireSeller, async (req, res, next) =>
 
     // Send SMS notification to buyer
     await otpService.sendOrderNotification(updated.buyer.phone, updated.orderNumber, status);
+
+    // Send status update email (fire-and-forget)
+    const buyerEmail = updated.buyer?.email;
+    if (buyerEmail) {
+      emailService.sendOrderStatusUpdate(buyerEmail, updated, status).catch(() => {});
+    }
 
     res.json({ order: updated });
   } catch (error) {

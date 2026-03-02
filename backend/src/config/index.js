@@ -4,6 +4,10 @@ module.exports = {
   port: process.env.PORT || 4000,
   env: process.env.NODE_ENV || 'development',
   frontendUrl: process.env.FRONTEND_URL || 'http://localhost:5173',
+
+  // Platform fees
+  COMMISSION_RATE: 0.05,    // 5% seller commission
+  SERVICE_FEE_RATE: 0.025,  // 2.5% buyer service fee
   
   jwt: {
     secret: process.env.JWT_SECRET,

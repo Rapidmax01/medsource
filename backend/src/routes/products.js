@@ -1,6 +1,7 @@
 const express = require('express');
 const prisma = require('../models');
 const searchService = require('../services/search');
+const nafdacService = require('../services/nafdac');
 const { authenticate, requireSeller, optionalAuth } = require('../middleware/auth');
 const { validate, schemas } = require('../middleware/validate');
 
@@ -112,12 +113,9 @@ router.get('/:id', optionalAuth, async (req, res, next) => {
             isVerified: true,
             state: true,
             city: true,
-            address: true,
             rating: true,
             totalSales: true,
             responseTime: true,
-            businessPhone: true,
-            whatsapp: true,
             logo: true,
             reviews: {
               take: 5,
@@ -217,6 +215,20 @@ router.post('/', authenticate, requireSeller, validate(schemas.createProduct), a
         },
       },
     });
+
+    // Auto-verify NAFDAC number (fire-and-forget)
+    if (nafdacNumber) {
+      nafdacService.verify(nafdacNumber)
+        .then((result) => {
+          if (result && (result.verified || result.isRegistered)) {
+            return prisma.product.update({
+              where: { id: product.id },
+              data: { nafdacVerified: true },
+            });
+          }
+        })
+        .catch((err) => console.error('NAFDAC auto-verify error:', err.message));
+    }
 
     res.status(201).json({ product });
   } catch (error) {

@@ -2630,6 +2630,10 @@ img { max-width: 100%; display: block; }
   background: var(--red-500);
 }
 
+.toast-info {
+  background: #2563EB;
+}
+
 .toast-message {
   flex: 1;
 }

@@ -29,6 +29,7 @@ enum AccountType {
   PHARMACY
   BLOOD_BANK
   DISTRIBUTOR
+  LABORATORY
 }
 
 model User {
@@ -100,6 +101,12 @@ model Seller {
   nafdacLicense   String?     // Seller's NAFDAC license number
   cacNumber       String?     // CAC registration number
   verifiedAt      DateTime?
+  bvn             String?     // 11-digit Bank Verification Number
+  bvnVerified     Boolean     @default(false)
+  bvnVerifiedAt   DateTime?
+  bvnFirstName    String?     // Name returned by Paystack BVN resolve
+  bvnLastName     String?     // Name returned by Paystack BVN resolve
+  nin             String?     // 11-digit National Identification Number
   
   // Location
   state           String
@@ -114,9 +121,12 @@ model Seller {
   whatsapp        String?
 
   // Stats
-  rating          Float       @default(0)
-  totalSales      Int         @default(0)
-  responseTime    Int?        // Average response time in minutes
+  rating              Float       @default(0)
+  totalSales          Int         @default(0)
+  responseTime        Int?        // Average response time in minutes
+  totalEarnings       Float       @default(0)   // Cumulative earnings from paid orders
+  totalCommissionPaid Float       @default(0)   // Cumulative commission deducted
+  pendingBalance      Float       @default(0)   // Earnings not yet paid out
 
   createdAt       DateTime    @default(now())
   updatedAt       DateTime    @updatedAt
@@ -244,6 +254,9 @@ model Order {
   subtotal        Float
   deliveryFee     Float          @default(0)
   serviceFee      Float          @default(0)
+  commission      Float          @default(0)      // 5% of subtotal (platform fee)
+  commissionRate  Float          @default(0.05)   // Rate used for audit trail
+  sellerEarnings  Float          @default(0)      // subtotal minus commission
   totalAmount     Float
   currency        String         @default("NGN")
   

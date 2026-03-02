@@ -14,10 +14,10 @@ describe('HomePage', () => {
   it('renders category filter chips', async () => {
     render(<HomePage />);
     expect(screen.getByText('All')).toBeInTheDocument();
-    expect(screen.getByText('Oncology')).toBeInTheDocument();
-    expect(screen.getByText('Rare Disease')).toBeInTheDocument();
-    expect(screen.getByText('Anti-infective')).toBeInTheDocument();
+    expect(screen.getByText('Pharmaceuticals')).toBeInTheDocument();
     expect(screen.getByText('Blood Products')).toBeInTheDocument();
+    expect(screen.getByText('Vaccines')).toBeInTheDocument();
+    expect(screen.getByText('Diagnostics')).toBeInTheDocument();
   });
 
   it('shows loading state initially (Searching...)', () => {

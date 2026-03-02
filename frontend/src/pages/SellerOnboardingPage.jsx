@@ -10,6 +10,7 @@ const BUSINESS_TYPES = [
   { value: 'HOSPITAL', label: 'Hospital' },
   { value: 'BLOOD_BANK', label: 'Blood Bank' },
   { value: 'DISTRIBUTOR', label: 'Distributor' },
+  { value: 'LABORATORY', label: 'Laboratory' },
 ];
 
 const NIGERIAN_STATES = [
@@ -52,6 +53,8 @@ export default function SellerOnboardingPage() {
     description: '',
     nafdacLicense: '',
     cacNumber: '',
+    bvn: '',
+    nin: '',
     businessPhone: '',
     businessEmail: '',
     whatsapp: '',
@@ -80,12 +83,20 @@ export default function SellerOnboardingPage() {
       }
     }
     if (step === 2) {
-      if (!formData.nafdacLicense.trim()) {
-        showToast('NAFDAC license number is required', 'error');
-        return false;
-      }
       if (!formData.cacNumber.trim()) {
         showToast('CAC registration number is required', 'error');
+        return false;
+      }
+      if (!formData.nin.trim()) {
+        showToast('NIN is required', 'error');
+        return false;
+      }
+      if (!/^\d{11}$/.test(formData.nin)) {
+        showToast('NIN must be exactly 11 digits', 'error');
+        return false;
+      }
+      if (formData.bvn && !/^\d{11}$/.test(formData.bvn)) {
+        showToast('BVN must be exactly 11 digits', 'error');
         return false;
       }
     }
@@ -255,7 +266,7 @@ export default function SellerOnboardingPage() {
         {step === 2 && (
           <div>
             <div className="form-group">
-              <label className="form-label" htmlFor="nafdacLicense">NAFDAC License Number</label>
+              <label className="form-label" htmlFor="nafdacLicense">NAFDAC License Number (Optional)</label>
               <input
                 id="nafdacLicense"
                 type="text"
@@ -284,6 +295,40 @@ export default function SellerOnboardingPage() {
               </p>
             </div>
 
+            <div className="form-group">
+              <label className="form-label" htmlFor="nin">NIN (National Identification Number)</label>
+              <input
+                id="nin"
+                type="text"
+                className="form-input"
+                placeholder="Enter your 11-digit NIN"
+                value={formData.nin}
+                onChange={handleChange('nin')}
+                inputMode="numeric"
+                maxLength={11}
+              />
+              <p style={{ fontSize: 12, color: 'var(--gray-400)', marginTop: 6 }}>
+                Your NIN from the National Identity Management Commission (NIMC)
+              </p>
+            </div>
+
+            <div className="form-group">
+              <label className="form-label" htmlFor="bvn">BVN (Bank Verification Number)</label>
+              <input
+                id="bvn"
+                type="text"
+                className="form-input"
+                placeholder="Enter your 11-digit BVN"
+                value={formData.bvn}
+                onChange={handleChange('bvn')}
+                inputMode="numeric"
+                maxLength={11}
+              />
+              <p style={{ fontSize: 12, color: 'var(--gray-400)', marginTop: 6 }}>
+                Your BVN is used for identity verification. It will be verified securely via Paystack.
+              </p>
+            </div>
+
             <div style={{
               padding: 16,
               borderRadius: 'var(--radius-md)',
@@ -292,7 +337,7 @@ export default function SellerOnboardingPage() {
               marginTop: 20,
             }}>
               <p style={{ fontSize: 13, color: '#92400E', lineHeight: 1.6 }}>
-                Your NAFDAC license and CAC number will be verified before your account is activated.
+                Your NIN, CAC number, BVN, and NAFDAC license (if provided) will be verified before your account is activated.
                 This typically takes 1-2 business days.
               </p>
             </div>

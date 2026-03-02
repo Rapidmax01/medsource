@@ -1,5 +1,8 @@
+import { useEffect } from 'react';
 import { Routes, Route, Navigate } from 'react-router-dom';
 import { useAuth } from './context/AuthContext';
+import { useToast } from './context/ToastContext';
+import { onForegroundMessage } from './services/firebase';
 import Layout from './components/shared/Layout';
 import HomePage from './pages/HomePage';
 import ProductPage from './pages/ProductPage';
@@ -15,9 +18,23 @@ import EmailVerifyPage from './pages/EmailVerifyPage';
 import ForgotPasswordPage from './pages/ForgotPasswordPage';
 import SellerDashboardPage from './pages/SellerDashboardPage';
 import SellerOnboardingPage from './pages/SellerOnboardingPage';
+import ProductFormPage from './pages/ProductFormPage';
 import AdminPage from './pages/AdminPage';
 import CheckoutPage from './pages/CheckoutPage';
 import PaymentCallbackPage from './pages/PaymentCallbackPage';
+
+function NotificationListener() {
+  const { showToast } = useToast();
+
+  useEffect(() => {
+    const unsubscribe = onForegroundMessage(({ title, body }) => {
+      showToast(`${title}${body ? ': ' + body : ''}`, 'info');
+    });
+    return unsubscribe;
+  }, [showToast]);
+
+  return null;
+}
 
 function ProtectedRoute({ children }) {
   const { user, loading } = useAuth();
@@ -43,6 +60,8 @@ function AdminRoute({ children }) {
 
 export default function App() {
   return (
+    <>
+    <NotificationListener />
     <Routes>
       {/* Auth routes - no bottom nav */}
       <Route path="/login" element={<GuestRoute><LoginPage /></GuestRoute>} />
@@ -68,6 +87,8 @@ export default function App() {
       <Route path="/seller" element={<ProtectedRoute><SellerDashboardPage /></ProtectedRoute>} />
       <Route path="/seller/onboarding" element={<ProtectedRoute><SellerOnboardingPage /></ProtectedRoute>} />
       <Route path="/seller/register" element={<ProtectedRoute><SellerOnboardingPage /></ProtectedRoute>} />
+      <Route path="/seller/products/new" element={<ProtectedRoute><ProductFormPage /></ProtectedRoute>} />
+      <Route path="/seller/products/:id/edit" element={<ProtectedRoute><ProductFormPage /></ProtectedRoute>} />
 
       {/* Admin */}
       <Route path="/admin" element={<AdminRoute><AdminPage /></AdminRoute>} />
@@ -75,5 +96,6 @@ export default function App() {
       {/* Catch-all */}
       <Route path="*" element={<Navigate to="/" replace />} />
     </Routes>
+    </>
   );
 }

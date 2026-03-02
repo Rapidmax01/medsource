@@ -256,8 +256,8 @@ function AddProductForm({ onBack, onSubmit }) {
             <div className="form-group">
               <label className="form-label">Category</label>
               <select className="form-input form-select" value={form.category} onChange={(e) => set("category", e.target.value)}>
-                <option>Oncology</option><option>Rare Disease</option><option>Anti-infective</option>
-                <option>Cardiology</option><option>Neurology</option><option>Immunology</option><option>Other</option>
+                <option>Oncology</option><option>Rare Disease</option><option>Orphan Drugs</option>
+                <option>Anti-infective</option><option>Vaccines</option><option>Diagnostics</option><option>Other</option>
               </select>
             </div>
             <div className="form-group">

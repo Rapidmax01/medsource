@@ -254,13 +254,8 @@ export default function ProductPage() {
                 </div>
               </div>
               <div className="seller-actions">
-                {product.seller.phone && (
-                  <a href={`tel:${product.seller.phone}`} className="btn btn-outline btn-sm">
-                    <Icons.Phone /> Call
-                  </a>
-                )}
                 <button className="btn btn-outline btn-sm" onClick={() => setShowInquiry(true)}>
-                  <Icons.Message /> Message
+                  <Icons.Message /> Send Inquiry
                 </button>
               </div>
             </div>

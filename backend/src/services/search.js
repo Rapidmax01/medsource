@@ -99,7 +99,6 @@ class SearchService {
               state: true,
               city: true,
               rating: true,
-              businessPhone: true,
             },
           },
         },

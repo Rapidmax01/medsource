@@ -94,6 +94,31 @@ class PaymentService {
   }
 
   // ============================================================
+  // BVN VERIFICATION
+  // ============================================================
+
+  /**
+   * Resolve BVN via Paystack identity API
+   * Returns name/DOB info for identity verification during seller onboarding
+   */
+  async resolveBVN(bvn) {
+    try {
+      const response = await this.paystack.get(`/bank/resolve_bvn/${bvn}`);
+      const data = response.data.data;
+      return {
+        success: true,
+        firstName: data.first_name,
+        lastName: data.last_name,
+        dateOfBirth: data.date_of_birth,
+        phone: data.mobile,
+      };
+    } catch (error) {
+      console.error('BVN resolve error:', error.response?.data || error.message);
+      return { success: false, error: error.response?.data?.message || 'BVN verification failed' };
+    }
+  }
+
+  // ============================================================
   // FLUTTERWAVE (Fallback)
   // ============================================================
 

@@ -6,10 +6,7 @@ import { Icons } from './Icons';
 
 const CATEGORIES = [
   'All',
-  'Oncology',
-  'Rare Disease',
-  'Orphan Drugs',
-  'Anti-infective',
+  'Pharmaceuticals',
   'Blood Products',
   'Vaccines',
   'Diagnostics',
@@ -103,7 +100,23 @@ export default function Layout() {
             All
           </button>
           {CATEGORIES.slice(1).map((cat) => (
-            cat === 'Diagnostics' ? (
+            cat === 'Pharmaceuticals' ? (
+              <div key={cat} className="amz-subnav-dropdown">
+                <Link
+                  to="/?category=Pharmaceuticals"
+                  className="amz-subnav-link"
+                >
+                  Pharmaceuticals <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" style={{ marginLeft: 2 }}><polyline points="6 9 12 15 18 9"/></svg>
+                </Link>
+                <div className="amz-subnav-dropdown-menu">
+                  <Link to="/?category=Pharmaceuticals" className="amz-subnav-dropdown-item">All Pharmaceuticals</Link>
+                  <Link to="/?category=Oncology" className="amz-subnav-dropdown-item">Oncology</Link>
+                  <Link to="/?category=Rare+Disease" className="amz-subnav-dropdown-item">Rare Disease</Link>
+                  <Link to="/?category=Orphan+Drugs" className="amz-subnav-dropdown-item">Orphan Drugs</Link>
+                  <Link to="/?category=Anti-infective" className="amz-subnav-dropdown-item">Anti-infective</Link>
+                </div>
+              </div>
+            ) : cat === 'Diagnostics' ? (
               <div key={cat} className="amz-subnav-dropdown">
                 <Link
                   to={`/?category=${encodeURIComponent(cat)}`}

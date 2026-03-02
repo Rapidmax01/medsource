@@ -4,7 +4,8 @@ import { productApi } from '../services/api';
 import { useAuth } from '../context/AuthContext';
 import { Icons, formatNaira } from '../components/shared/Icons';
 
-const CATEGORIES = ['All', 'Oncology', 'Rare Disease', 'Orphan Drugs', 'Anti-infective', 'Blood Products', 'Vaccines', 'Diagnostics'];
+const CATEGORIES = ['All', 'Pharmaceuticals', 'Blood Products', 'Vaccines', 'Diagnostics'];
+const PHARMA_SUB = ['Oncology', 'Rare Disease', 'Orphan Drugs', 'Anti-infective'];
 const DIAGNOSTICS_SUB = ['Diagnostics', 'Laboratories'];
 const BLOOD_TYPES = ['A+', 'A-', 'B+', 'B-', 'AB+', 'AB-', 'O+', 'O-'];
 
@@ -94,6 +95,8 @@ export default function HomePage() {
       if (category !== 'All') {
         if (category === 'Blood Products') {
           params.type = 'BLOOD_PRODUCT';
+        } else if (category === 'Pharmaceuticals') {
+          params.type = 'PHARMACEUTICAL';
         } else {
           params.type = 'PHARMACEUTICAL';
           params.category = category;
@@ -115,7 +118,7 @@ export default function HomePage() {
 
   // Sync URL category param → local state
   useEffect(() => {
-    if (urlCategory && [...CATEGORIES, ...DIAGNOSTICS_SUB].includes(urlCategory)) {
+    if (urlCategory && [...CATEGORIES, ...PHARMA_SUB, ...DIAGNOSTICS_SUB].includes(urlCategory)) {
       setCategory(urlCategory);
     } else if (!urlCategory && !query) {
       setCategory('All');
@@ -144,8 +147,8 @@ export default function HomePage() {
 
   const handleQuickAction = (filter) => {
     if (filter === 'PHARMACEUTICAL') {
-      setCategory('All');
-      navigate('/?type=pharmaceutical');
+      setCategory('Pharmaceuticals');
+      navigate('/?category=Pharmaceuticals');
     } else if (filter === 'BLOOD_PRODUCT') {
       setCategory('Blood Products');
     } else if (filter === 'urgent') {
@@ -200,7 +203,33 @@ export default function HomePage() {
       {/* Category Chips */}
       <div className="category-strip">
         {CATEGORIES.map((cat) => (
-          cat === 'Diagnostics' ? (
+          cat === 'Pharmaceuticals' ? (
+            <div key={cat} className="category-chip-dropdown">
+              <button
+                className={`category-chip ${category === 'Pharmaceuticals' || PHARMA_SUB.includes(category) ? 'active' : ''}`}
+                onClick={() => handleCategoryChange('Pharmaceuticals')}
+              >
+                Pharmaceuticals <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" style={{ marginLeft: 2 }}><polyline points="6 9 12 15 18 9"/></svg>
+              </button>
+              <div className="category-chip-dropdown-menu">
+                <button
+                  className={`category-chip-dropdown-item ${category === 'Pharmaceuticals' ? 'active' : ''}`}
+                  onClick={() => handleCategoryChange('Pharmaceuticals')}
+                >
+                  All Pharmaceuticals
+                </button>
+                {PHARMA_SUB.map((sub) => (
+                  <button
+                    key={sub}
+                    className={`category-chip-dropdown-item ${category === sub ? 'active' : ''}`}
+                    onClick={() => handleCategoryChange(sub)}
+                  >
+                    {sub}
+                  </button>
+                ))}
+              </div>
+            </div>
+          ) : cat === 'Diagnostics' ? (
             <div key={cat} className="category-chip-dropdown">
               <button
                 className={`category-chip ${DIAGNOSTICS_SUB.includes(category) ? 'active' : ''}`}

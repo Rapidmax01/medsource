@@ -2,6 +2,7 @@ const express = require('express');
 const prisma = require('../models');
 const paymentService = require('../services/payment');
 const notificationService = require('../services/notification');
+const emailService = require('../services/email');
 const { authenticate } = require('../middleware/auth');
 const { webhookLimiter } = require('../middleware/rateLimit');
 
@@ -155,15 +156,26 @@ async function handleSuccessfulPayment(reference, provider, providerData) {
     },
   });
 
-  // Update seller stats
+  // Update seller stats and earnings
   await prisma.seller.update({
     where: { id: payment.order.sellerId },
-    data: { totalSales: { increment: 1 } },
+    data: {
+      totalSales: { increment: 1 },
+      totalEarnings: { increment: payment.order.sellerEarnings || 0 },
+      totalCommissionPaid: { increment: payment.order.commission || 0 },
+      pendingBalance: { increment: payment.order.sellerEarnings || 0 },
+    },
   });
 
   // Send notifications
   await notificationService.notifyPaymentReceived(payment.order);
   await notificationService.notifyOrderConfirmed(payment.order);
+
+  // Send payment receipt email (fire-and-forget)
+  const buyerEmail = payment.order.buyer?.email;
+  if (buyerEmail) {
+    emailService.sendPaymentReceipt(buyerEmail, payment.order, payment).catch(() => {});
+  }
 
   console.log(`✅ Payment confirmed: ${reference} - ₦${payment.amount}`);
 }

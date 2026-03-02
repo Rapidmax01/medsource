@@ -2,7 +2,7 @@ import { useState, useEffect, useCallback } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
 import { useToast } from '../context/ToastContext';
-import { sellerApi, inquiryApi, orderApi } from '../services/api';
+import { sellerApi, inquiryApi, orderApi, productApi } from '../services/api';
 import { Icons, formatNaira } from '../components/shared/Icons';
 
 const TABS = ['Overview', 'Products', 'Orders', 'Inquiries'];
@@ -86,11 +86,13 @@ function OverviewTab() {
     );
   }
 
+  const s = data.stats || {};
+  const earnings = s.earnings || {};
   const stats = [
-    { label: 'Monthly Revenue', value: formatNaira(data.monthlyRevenue || 0), color: 'var(--green-600)' },
-    { label: 'Total Revenue', value: formatNaira(data.totalRevenue || 0), color: 'var(--green-800)' },
-    { label: 'Active Products', value: data.activeProducts || 0, color: 'var(--blue-500)' },
-    { label: 'Rating', value: data.rating ? `${data.rating.toFixed(1)} / 5` : 'N/A', color: 'var(--amber-500)' },
+    { label: 'Pending Balance', value: formatNaira(earnings.pendingBalance || 0), color: 'var(--green-600)' },
+    { label: 'Total Earnings', value: formatNaira(earnings.totalEarnings || 0), color: 'var(--green-800)' },
+    { label: 'Commission Paid', value: formatNaira(earnings.totalCommissionPaid || 0), color: 'var(--red-500)' },
+    { label: 'Active Products', value: s.products?.active || 0, color: 'var(--blue-500)' },
   ];
 
   return (
@@ -102,6 +104,20 @@ function OverviewTab() {
             <div className="admin-stat-value" style={{ color: s.color }}>{s.value}</div>
           </div>
         ))}
+      </div>
+
+      {/* Commission info banner */}
+      <div style={{
+        padding: '12px 16px',
+        borderRadius: 'var(--radius-md)',
+        background: '#EFF6FF',
+        border: '1px solid #BFDBFE',
+        marginBottom: 20,
+        fontSize: 13,
+        color: '#1D4ED8',
+        fontWeight: 500,
+      }}>
+        A 5% platform commission is deducted from each sale. Your earnings reflect the amount after commission.
       </div>
 
       {/* Alerts */}
@@ -162,6 +178,8 @@ function OverviewTab() {
 function ProductsTab() {
   const [products, setProducts] = useState([]);
   const [loading, setLoading] = useState(true);
+  const [deletingId, setDeletingId] = useState(null);
+  const { showToast } = useToast();
 
   useEffect(() => {
     sellerApi.getProducts()
@@ -169,6 +187,18 @@ function ProductsTab() {
       .catch(() => {})
       .finally(() => setLoading(false));
   }, []);
+
+  const handleDelete = async (id) => {
+    try {
+      await productApi.delete(id);
+      setProducts((prev) => prev.filter((p) => p.id !== id));
+      showToast('Product removed');
+    } catch (err) {
+      showToast(err.error || 'Failed to remove product', 'error');
+    } finally {
+      setDeletingId(null);
+    }
+  };
 
   if (loading) {
     return (
@@ -219,9 +249,50 @@ function ProductsTab() {
             </div>
             <div className="product-bottom">
               <span className="product-price">{formatNaira(product.price)}</span>
-              <Link to={`/seller/products/${product.id}/edit`} className="btn-secondary" style={{ fontSize: 12, padding: '6px 14px', textDecoration: 'none' }}>
-                Edit
-              </Link>
+              <div style={{ display: 'flex', gap: 6 }}>
+                <Link to={`/seller/products/${product.id}/edit`} className="btn-secondary" style={{ fontSize: 12, padding: '6px 14px', textDecoration: 'none' }}>
+                  Edit
+                </Link>
+                {deletingId === product.id ? (
+                  <div style={{ display: 'flex', gap: 4, alignItems: 'center' }}>
+                    <span style={{ fontSize: 12, color: 'var(--gray-500)' }}>Remove?</span>
+                    <button
+                      onClick={() => handleDelete(product.id)}
+                      style={{
+                        padding: '4px 10px', fontSize: 12, fontWeight: 600,
+                        border: '1px solid var(--red-500)', borderRadius: 'var(--radius-full)',
+                        background: 'var(--red-500)', color: '#fff', cursor: 'pointer',
+                        fontFamily: "'DM Sans', sans-serif",
+                      }}
+                    >
+                      Yes
+                    </button>
+                    <button
+                      onClick={() => setDeletingId(null)}
+                      style={{
+                        padding: '4px 10px', fontSize: 12, fontWeight: 600,
+                        border: '1px solid var(--gray-300)', borderRadius: 'var(--radius-full)',
+                        background: '#fff', color: 'var(--gray-600)', cursor: 'pointer',
+                        fontFamily: "'DM Sans', sans-serif",
+                      }}
+                    >
+                      Cancel
+                    </button>
+                  </div>
+                ) : (
+                  <button
+                    onClick={() => setDeletingId(product.id)}
+                    style={{
+                      padding: '6px 12px', fontSize: 12, fontWeight: 600,
+                      border: '1px solid var(--red-100)', borderRadius: 'var(--radius-full)',
+                      background: 'var(--red-50)', color: 'var(--red-500)', cursor: 'pointer',
+                      fontFamily: "'DM Sans', sans-serif",
+                    }}
+                  >
+                    Delete
+                  </button>
+                )}
+              </div>
             </div>
           </div>
         ))
@@ -321,8 +392,15 @@ function OrdersTab() {
                 ))}
               </div>
             )}
-            <div style={{ fontSize: 17, fontWeight: 700, color: 'var(--green-800)', marginBottom: 12 }}>
-              {formatNaira(order.total)}
+            <div style={{ marginBottom: 12 }}>
+              <div style={{ fontSize: 17, fontWeight: 700, color: 'var(--green-800)' }}>
+                {formatNaira(order.sellerEarnings || order.total)}
+              </div>
+              {order.commission > 0 && (
+                <div style={{ fontSize: 12, color: 'var(--gray-500)', marginTop: 2 }}>
+                  Subtotal: {formatNaira(order.subtotal)} | Commission: -{formatNaira(order.commission)} (5%)
+                </div>
+              )}
             </div>
 
             {getNextActions(order.status).length > 0 && (

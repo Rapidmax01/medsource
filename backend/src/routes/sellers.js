@@ -1,6 +1,7 @@
 const express = require('express');
 const prisma = require('../models');
 const { authenticate, requireSeller } = require('../middleware/auth');
+const paymentService = require('../services/payment');
 
 const router = express.Router();
 
@@ -14,7 +15,7 @@ router.post('/register', authenticate, async (req, res, next) => {
       businessName, businessType, description,
       state, city, address,
       businessPhone, businessEmail, whatsapp,
-      nafdacLicense, cacNumber,
+      nafdacLicense, cacNumber, bvn, nin,
     } = req.body;
 
     // Check if already a seller
@@ -25,6 +26,20 @@ router.post('/register', authenticate, async (req, res, next) => {
     // Validate required fields
     if (!businessName || !state || !city || !businessPhone) {
       return res.status(400).json({ error: 'Business name, location, and phone are required' });
+    }
+
+    // BVN verification (non-blocking — seller still created if it fails)
+    let bvnData = {};
+    if (bvn && /^\d{11}$/.test(bvn)) {
+      const bvnResult = await paymentService.resolveBVN(bvn);
+      if (bvnResult.success) {
+        bvnData = {
+          bvnVerified: true,
+          bvnVerifiedAt: new Date(),
+          bvnFirstName: bvnResult.firstName,
+          bvnLastName: bvnResult.lastName,
+        };
+      }
     }
 
     // Create seller profile and update user role
@@ -43,6 +58,9 @@ router.post('/register', authenticate, async (req, res, next) => {
           whatsapp,
           nafdacLicense,
           cacNumber,
+          ...(bvn && { bvn }),
+          ...bvnData,
+          ...(nin && { nin }),
         },
       }),
       prisma.user.update({
@@ -63,6 +81,9 @@ router.post('/register', authenticate, async (req, res, next) => {
  */
 router.get('/dashboard', authenticate, requireSeller, async (req, res, next) => {
   try {
+    if (!req.user.seller) {
+      return res.status(403).json({ error: 'No seller profile found for this account' });
+    }
     const sellerId = req.user.seller.id;
     const now = new Date();
     const thirtyDaysAgo = new Date(now.setDate(now.getDate() - 30));
@@ -79,6 +100,7 @@ router.get('/dashboard', authenticate, requireSeller, async (req, res, next) => 
       totalRevenue,
       monthlyRevenue,
       reviews,
+      seller,
     ] = await Promise.all([
       prisma.product.count({ where: { sellerId, isActive: true } }),
       prisma.product.count({ where: { sellerId, isActive: true, inStock: true } }),
@@ -107,7 +129,7 @@ router.get('/dashboard', authenticate, requireSeller, async (req, res, next) => 
       prisma.inquiry.count({ where: { sellerId, status: 'PENDING' } }),
       prisma.order.aggregate({
         where: { sellerId, paymentStatus: 'PAID' },
-        _sum: { totalAmount: true },
+        _sum: { sellerEarnings: true, totalAmount: true },
       }),
       prisma.order.aggregate({
         where: {
@@ -115,12 +137,16 @@ router.get('/dashboard', authenticate, requireSeller, async (req, res, next) => 
           paymentStatus: 'PAID',
           createdAt: { gte: thirtyDaysAgo },
         },
-        _sum: { totalAmount: true },
+        _sum: { sellerEarnings: true, totalAmount: true },
       }),
       prisma.review.aggregate({
         where: { sellerId },
         _avg: { rating: true },
         _count: { id: true },
+      }),
+      prisma.seller.findUnique({
+        where: { id: sellerId },
+        select: { totalEarnings: true, totalCommissionPaid: true, pendingBalance: true },
       }),
     ]);
 
@@ -140,8 +166,14 @@ router.get('/dashboard', authenticate, requireSeller, async (req, res, next) => 
           pending: pendingInquiries,
         },
         revenue: {
-          total: totalRevenue._sum.totalAmount || 0,
-          monthly: monthlyRevenue._sum.totalAmount || 0,
+          total: totalRevenue._sum.sellerEarnings || totalRevenue._sum.totalAmount || 0,
+          monthly: monthlyRevenue._sum.sellerEarnings || monthlyRevenue._sum.totalAmount || 0,
+        },
+        earnings: {
+          totalEarnings: seller?.totalEarnings || 0,
+          totalCommissionPaid: seller?.totalCommissionPaid || 0,
+          pendingBalance: seller?.pendingBalance || 0,
+          commissionRate: 5, // percentage
         },
         rating: {
           average: reviews._avg.rating || 0,
