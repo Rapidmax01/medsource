@@ -8,8 +8,11 @@ import PasswordInput from '../components/shared/PasswordInput';
 
 export default function ProfilePage() {
   const navigate = useNavigate();
-  const { user, isSeller, isAdmin, logout } = useAuth();
+  const { user, isSeller, isAdmin, logout, updateUser } = useAuth();
   const { showToast } = useToast();
+  const [showEditProfile, setShowEditProfile] = useState(false);
+  const [editData, setEditData] = useState({});
+  const [savingProfile, setSavingProfile] = useState(false);
   const [showChangePassword, setShowChangePassword] = useState(false);
   const [currentPassword, setCurrentPassword] = useState('');
   const [newPassword, setNewPassword] = useState('');
@@ -121,6 +124,124 @@ export default function ProfilePage() {
           <span className="profile-stat-value">{user.accountType ? user.accountType.charAt(0) + user.accountType.slice(1).toLowerCase().replace(/_/g, ' ') : 'Individual'}</span>
           <span className="profile-stat-label">Account</span>
         </div>
+      </div>
+
+      {/* Edit Profile */}
+      <div className="profile-menu" style={{ marginBottom: 0 }}>
+        <button
+          className="profile-menu-item"
+          onClick={() => {
+            if (!showEditProfile) {
+              setEditData({
+                firstName: user.firstName || '',
+                lastName: user.lastName || '',
+                phone: user.phone || '',
+                state: user.state || '',
+                city: user.city || '',
+              });
+            }
+            setShowEditProfile(!showEditProfile);
+          }}
+          style={{ background: 'none', border: 'none', width: '100%', cursor: 'pointer', textAlign: 'left', fontFamily: 'inherit' }}
+        >
+          <span className="profile-menu-icon"><Icons.User /></span>
+          <div className="profile-menu-text">
+            <span className="profile-menu-label">Edit Profile</span>
+            <span className="profile-menu-desc">
+              {!user.phone ? 'Add your phone number & location' : 'Update your personal info'}
+            </span>
+          </div>
+          <span className="profile-menu-arrow">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round">
+              <polyline points={showEditProfile ? "18 15 12 9 6 15" : "9 18 15 12 9 6"} />
+            </svg>
+          </span>
+        </button>
+
+        {showEditProfile && (
+          <form
+            onSubmit={async (e) => {
+              e.preventDefault();
+              if (!editData.firstName?.trim() || !editData.lastName?.trim()) {
+                showToast('First and last name are required', 'error');
+                return;
+              }
+              if (editData.phone && !/^(\+234|0)[789]\d{9}$/.test(editData.phone)) {
+                showToast('Enter a valid Nigerian phone number', 'error');
+                return;
+              }
+              setSavingProfile(true);
+              try {
+                const res = await authApi.updateProfile(editData);
+                updateUser(res.user || editData);
+                showToast('Profile updated!');
+                setShowEditProfile(false);
+              } catch (err) {
+                showToast(err.error || 'Failed to update profile', 'error');
+              } finally {
+                setSavingProfile(false);
+              }
+            }}
+            style={{ padding: '0 16px 16px' }}
+          >
+            <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 10, marginBottom: 12 }}>
+              <div>
+                <label style={{ fontSize: 12, fontWeight: 600, color: 'var(--gray-500)', display: 'block', marginBottom: 4 }}>First Name</label>
+                <input
+                  className="form-input"
+                  value={editData.firstName || ''}
+                  onChange={(e) => setEditData((p) => ({ ...p, firstName: e.target.value }))}
+                />
+              </div>
+              <div>
+                <label style={{ fontSize: 12, fontWeight: 600, color: 'var(--gray-500)', display: 'block', marginBottom: 4 }}>Last Name</label>
+                <input
+                  className="form-input"
+                  value={editData.lastName || ''}
+                  onChange={(e) => setEditData((p) => ({ ...p, lastName: e.target.value }))}
+                />
+              </div>
+            </div>
+            <div style={{ marginBottom: 12 }}>
+              <label style={{ fontSize: 12, fontWeight: 600, color: 'var(--gray-500)', display: 'block', marginBottom: 4 }}>Phone Number</label>
+              <input
+                className="form-input"
+                type="tel"
+                placeholder="+234 800 000 0000"
+                inputMode="numeric"
+                value={editData.phone || ''}
+                onChange={(e) => setEditData((p) => ({ ...p, phone: e.target.value }))}
+              />
+            </div>
+            <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 10, marginBottom: 16 }}>
+              <div>
+                <label style={{ fontSize: 12, fontWeight: 600, color: 'var(--gray-500)', display: 'block', marginBottom: 4 }}>State</label>
+                <input
+                  className="form-input"
+                  placeholder="e.g. Lagos"
+                  value={editData.state || ''}
+                  onChange={(e) => setEditData((p) => ({ ...p, state: e.target.value }))}
+                />
+              </div>
+              <div>
+                <label style={{ fontSize: 12, fontWeight: 600, color: 'var(--gray-500)', display: 'block', marginBottom: 4 }}>City</label>
+                <input
+                  className="form-input"
+                  placeholder="e.g. Ikeja"
+                  value={editData.city || ''}
+                  onChange={(e) => setEditData((p) => ({ ...p, city: e.target.value }))}
+                />
+              </div>
+            </div>
+            <button
+              type="submit"
+              className="btn-primary btn-full"
+              disabled={savingProfile}
+            >
+              {savingProfile ? 'Saving...' : 'Save Changes'}
+            </button>
+          </form>
+        )}
       </div>
 
       {/* Menu Items */}

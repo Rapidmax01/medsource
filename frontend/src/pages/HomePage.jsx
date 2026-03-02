@@ -166,8 +166,73 @@ export default function HomePage() {
     ? `Welcome back, ${user.firstName || user.name || 'there'}`
     : 'Find what you need';
 
+  const profileIncomplete = user && !user.phone;
+  const [bannerDismissed, setBannerDismissed] = useState(() => {
+    try { return localStorage.getItem('medsource_profile_banner_dismissed') === 'true'; } catch { return false; }
+  });
+
+  const dismissBanner = () => {
+    setBannerDismissed(true);
+    localStorage.setItem('medsource_profile_banner_dismissed', 'true');
+  };
+
   return (
     <div className="home-page">
+      {/* Complete Profile Banner */}
+      {profileIncomplete && !bannerDismissed && (
+        <div style={{
+          margin: '12px 16px 0',
+          padding: '12px 16px',
+          borderRadius: 'var(--radius-md)',
+          background: 'linear-gradient(135deg, #EFF6FF 0%, #DBEAFE 100%)',
+          border: '1px solid #93C5FD',
+          display: 'flex',
+          alignItems: 'flex-start',
+          gap: 10,
+        }}>
+          <div style={{ flex: 1 }}>
+            <p style={{ fontSize: 13, fontWeight: 700, color: '#1E40AF', margin: '0 0 4px' }}>
+              Complete your profile
+            </p>
+            <p style={{ fontSize: 12, color: '#3B82F6', margin: 0, lineHeight: 1.5 }}>
+              Add your phone number and location to place orders and get the best experience.
+            </p>
+            <button
+              onClick={() => navigate('/profile')}
+              style={{
+                marginTop: 8,
+                padding: '6px 14px',
+                borderRadius: 'var(--radius-full)',
+                border: 'none',
+                background: '#2563EB',
+                color: '#fff',
+                fontSize: 12,
+                fontWeight: 600,
+                cursor: 'pointer',
+                fontFamily: "'DM Sans', sans-serif",
+              }}
+            >
+              Update Profile
+            </button>
+          </div>
+          <button
+            onClick={dismissBanner}
+            style={{
+              background: 'none',
+              border: 'none',
+              color: '#93C5FD',
+              cursor: 'pointer',
+              padding: 4,
+              lineHeight: 1,
+              flexShrink: 0,
+            }}
+            aria-label="Dismiss"
+          >
+            <Icons.Close />
+          </button>
+        </div>
+      )}
+
       {/* Hero Banner */}
       {!query && category === 'All' && (
         <div className="hero-banner">

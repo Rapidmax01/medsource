@@ -205,7 +205,7 @@ router.get('/me', authenticate, async (req, res) => {
  */
 router.put('/profile', authenticate, async (req, res, next) => {
   try {
-    const { firstName, lastName, email, state, city, address, avatar } = req.body;
+    const { firstName, lastName, email, phone, state, city, address, avatar } = req.body;
 
     const updated = await prisma.user.update({
       where: { id: req.user.id },
@@ -213,6 +213,7 @@ router.put('/profile', authenticate, async (req, res, next) => {
         ...(firstName && { firstName }),
         ...(lastName && { lastName }),
         ...(email && { email }),
+        ...(phone && { phone }),
         ...(state && { state }),
         ...(city && { city }),
         ...(address && { address }),
